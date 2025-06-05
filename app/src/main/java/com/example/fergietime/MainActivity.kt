@@ -21,7 +21,7 @@ class MainActivity : ComponentActivity() {
             FergieTimeTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     Greeting(
-                        name = "Android",
+                        name = "FergieTime",
                         modifier = Modifier.padding(innerPadding)
                     )
                 }
