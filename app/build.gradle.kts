@@ -1,3 +1,6 @@
+// local.propertiesからMAPBOX_ACCESS_TOKENを取得
+val MAPBOX_ACCESS_TOKEN: String = project.findProperty("MAPBOX_ACCESS_TOKEN") as? String ?: ""
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -19,6 +22,9 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // BuildConfigにMAPBOX_ACCESS_TOKENを埋め込む
+        buildConfigField("String", "MAPBOX_ACCESS_TOKEN", "\"${MAPBOX_ACCESS_TOKEN}\"")
     }
 
     buildTypes {
@@ -72,4 +78,8 @@ dependencies {
     implementation ("com.google.firebase:firebase-database-ktx:21.0.0")
     implementation("com.google.android.gms:play-services-auth:21.3.0")
     implementation("com.google.firebase:firebase-firestore-ktx")
+
+    // Mapbox
+    implementation("com.mapbox.maps:android:11.0.0") // MapboxのコアSDK
+    implementation("com.mapbox.maps:extension-compose:11.0.0") // Jetpack Compose用の拡張
 }
