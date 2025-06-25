@@ -1,23 +1,18 @@
 pluginManagement {
     repositories {
-        google {
-            content {
-                includeGroupByRegex("com\\.android.*")
-                includeGroupByRegex("com\\.google.*")
-                includeGroupByRegex("androidx.*")
-            }
-        }
-        mavenCentral()
         gradlePluginPortal()
-    }
-}
-dependencyResolutionManagement {
-    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
-    repositories {
-        google()
+        google()       // ✅ Firebaseのプラグイン取得に必要
         mavenCentral()
     }
 }
 
-rootProject.name = "FergieTime"
-include(":app")
+dependencyResolutionManagement {
+    repositories {
+        google()       // ✅ Firebaseのライブラリ取得に必要
+        mavenCentral()
+    }
+}
+
+rootProject.name = "Fergietime"
+
+include(":app") // ← アプリモジュールの名前

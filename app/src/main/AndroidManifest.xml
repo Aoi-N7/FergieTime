@@ -2,8 +2,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- インターネットアクセスのパーミッションを追加 -->
+    <!-- Firebase・マップ用にインターネット許可 -->
     <uses-permission android:name="android.permission.INTERNET"/>
+
+    <!-- 将来的に現在地などを使う場合に必要 -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
 
     <application
         android:allowBackup="true"
@@ -15,6 +19,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.FergieTime"
         tools:targetApi="31">
+
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -22,10 +27,10 @@
             android:theme="@style/Theme.FergieTime">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
     </application>
 
 </manifest>
