@@ -18,14 +18,28 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            FergieTimeTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "FergieTimea",
-                        modifier = Modifier.padding(innerPadding)
-                    )
+            setContent {
+                FergieTimeTheme {
+                    Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                        // Columnで縦に並べる
+                        androidx.compose.foundation.layout.Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(innerPadding)
+                        ) {
+                            Greeting(name = "FergieTimea")
+
+//                            mapView.getMapboxMap().loadStyleUri(Style.MAPBOX_STREETS) {
+//                                Log.d("Mapbox", "Style loaded successfully")
+//                            }
+
+                            MapScreen(modifier = Modifier.weight(1f)) // Mapを画面の残りに表示
+
+                        }
+                    }
                 }
             }
+
         }
     }
 }
