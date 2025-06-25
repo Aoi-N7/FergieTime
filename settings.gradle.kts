@@ -11,6 +11,7 @@ pluginManagement {
         gradlePluginPortal()
     }
 }
+
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
@@ -18,7 +19,13 @@ dependencyResolutionManagement {
         mavenCentral()
 
         // MapboxのMavenリポジトリ設定
-        maven { url = uri("https://api.mapbox.com/downloads/v2/releases/maven") }
+        maven {
+            url = uri("https://api.mapbox.com/downloads/v2/releases/maven")
+            credentials {
+                username = "mapbox"
+                password = providers.gradleProperty("MAPBOX_DOWNLOADS_TOKEN").orNull ?: ""
+            }
+        }
     }
 }
 
