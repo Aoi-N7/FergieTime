@@ -90,4 +90,8 @@ dependencies {
     implementation("com.mapbox.maps:android:11.13.1")
     // Compose を使用する場合、Compose 拡張機能も追加します。
     implementation("com.mapbox.extension:maps-compose:11.13.1")
+    implementation("com.mapbox.navigationcore:android:3.10.0")
+    implementation("com.mapbox.maps:plugin-annotation:11.13.1")
+
+
 }
