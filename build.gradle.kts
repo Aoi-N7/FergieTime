@@ -6,5 +6,7 @@ plugins {
 
     // Firebaseプラグインの追加
     id("com.google.gms.google-services") version "4.4.2" apply false
-
 }
+
+// local.propertiesからMAPBOX_ACCESS_TOKENを取得
+val MAPBOX_ACCESS_TOKEN: String = project.findProperty("MAPBOX_ACCESS_TOKEN") as? String ?: ""

@@ -1,3 +1,5 @@
+import java.util.Properties     // local.propertiesファイルからプロパティを読み込む
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -19,6 +21,15 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // local.propertiesファイルからプロパティを読み込む
+        val localProperties = Properties()
+        localProperties.load(rootProject.file("local.properties").inputStream())
+
+        // MapboxのアクセストークンをBuildConfigに埋め込む（コード内でBuildConfig.MAPBOX_ACCESS_TOKENとしてアクセス可能）
+        buildConfigField("String", "MAPBOX_ACCESS_TOKEN", "\"${localProperties.getProperty("MAPBOX_ACCESS_TOKEN")}\"")
+        resValue("string", "mapbox_access_token", "\"${localProperties.getProperty("MAPBOX_ACCESS_TOKEN")}\"")
+
     }
 
     buildTypes {
@@ -39,6 +50,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
@@ -68,8 +80,14 @@ dependencies {
     implementation("com.google.firebase:firebase-core:21.1.1")
     implementation("com.google.firebase:firebase-auth-ktx")
     implementation("com.google.android.gms:play-services-auth:20.7.0")
-    implementation ("com.google.firebase:firebase-database-ktx:20.1.0")
     implementation ("com.google.firebase:firebase-database-ktx:21.0.0")
     implementation("com.google.android.gms:play-services-auth:21.3.0")
     implementation("com.google.firebase:firebase-firestore-ktx")
+
+    // Mapbox
+//    implementation("com.mapbox.maps:android:11.0.0") // MapboxのコアSDK
+//    implementation("com.mapbox.maps:extension-compose:11.0.0") // Jetpack Compose用の拡張
+    implementation("com.mapbox.maps:android:11.13.1")
+    // Compose を使用する場合、Compose 拡張機能も追加します。
+    implementation("com.mapbox.extension:maps-compose:11.13.1")
 }

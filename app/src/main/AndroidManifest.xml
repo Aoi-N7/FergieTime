@@ -5,14 +5,30 @@
     <!-- インターネットアクセスのパーミッションを追加 -->
     <uses-permission android:name="android.permission.INTERNET"/>
 
+    <!-- この権限は常に含める -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
+    <!-- アプリが正確な位置情報アクセスから利益を得る場合のみ含める -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+
     <application
-        android:name=".MyApplication"
-        android:label="@string/app_name"
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.FergieTime"
-        >
+        tools:targetApi="31">
+
+
+        <!-- Mapboxのアクセストークンを指定するためのメタデータ -->
+        <meta-data
+        android:name="com.mapbox.maps.token"
+        android:value="@string/mapbox_access_token" />
+
+
         <activity
             android:name=".MainActivity"
             android:exported="true"
