@@ -27,6 +27,10 @@ class MainActivity : ComponentActivity() {
         setContent {
             FergieTimeTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { padding ->
+
+                    // APIの節約のためコメントアウト
+                    //MapScreen(modifier = Modifier) // Mapを画面の残りに表示
+
                     GreetingScreen(
                         modifier = Modifier
                             .fillMaxSize()
@@ -40,7 +44,6 @@ class MainActivity : ComponentActivity() {
                             recreate()
                         }
                     )
-                    MapScreen() // Mapを画面の残りに表示
                 }
             }
         }
@@ -63,6 +66,7 @@ fun GreetingScreen(
         Button(onClick = { onChangeToJapanese() }) {
             Text(text = stringResource(id = R.string.change_language_japanese))
         }
+
     }
 }
 
