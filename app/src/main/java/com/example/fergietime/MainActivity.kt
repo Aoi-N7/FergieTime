@@ -28,7 +28,9 @@ class MainActivity : ComponentActivity() {
             FergieTimeTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { padding ->
                     GreetingScreen(
-                        modifier = Modifier.padding(padding),
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(padding),
                         onChangeToEnglish = {
                             LocaleHelper.saveLanguage(this, "en")
                             recreate()
@@ -38,6 +40,7 @@ class MainActivity : ComponentActivity() {
                             recreate()
                         }
                     )
+                    MapScreen() // Mapを画面の残りに表示
                 }
             }
         }
