@@ -1,3 +1,13 @@
 <resources>
-    <string name="app_name">FergieTime</string>
+    <string name="app_name">避難ARナビ</string>
+    <string name="evacuation_nav">避難ナビ</string>
+    <string name="ar_navigation">ARナビゲーション</string>
+    <string name="shelter_list">避難所一覧</string>
+    <string name="emergency_call">緊急通報</string>
+    <string name="back">戻る</string>
+    <string name="distance">距離</string>
+    <string name="direction">方向</string>
+    <string name="evacuation_instructions">避難指示</string>
+    <string name="location_permission_required">位置情報の権限が必要です</string>
+    <string name="current_location_unavailable">現在地を取得できません</string>
 </resources>

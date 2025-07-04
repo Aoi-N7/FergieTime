@@ -1,18 +1,20 @@
 pluginManagement {
     repositories {
-        gradlePluginPortal()
-        google()       // ✅ Firebaseのプラグイン取得に必要
+        google()
         mavenCentral()
+        gradlePluginPortal()
     }
 }
 
 dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
-        google()       // ✅ Firebaseのライブラリ取得に必要
+        google()
         mavenCentral()
+        // jitpack.ioは一時的にコメントアウト
+        // maven { url = uri("https://jitpack.io") }
     }
 }
 
-rootProject.name = "Fergietime"
-
-include(":app") // ← アプリモジュールの名前
+rootProject.name = "FergieTime"
+include(":app")
