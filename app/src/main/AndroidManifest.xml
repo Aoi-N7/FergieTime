@@ -8,13 +8,18 @@
     <!-- ネットワーク権限 -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <!-- カメラ権限（将来のAR機能用） -->
+    <!-- カメラ権限 -->
     <uses-permission android:name="android.permission.CAMERA" />
 
-    <!-- 必須ハードウェア（AR機能用、現在はオプション） -->
+    <!-- 必須ハードウェア（AR機能用） -->
     <uses-feature android:name="android.hardware.camera.ar" android:required="false" />
-    <uses-feature android:name="android.hardware.camera" android:required="false" />
-    <uses-feature android:glEsVersion="0x00030000" android:required="false" />
+    <uses-feature android:name="android.hardware.camera" android:required="true" />
+    <uses-feature android:glEsVersion="0x00030000" android:required="true" />
+
+    <!-- センサー機能 -->
+    <uses-feature android:name="android.hardware.sensor.accelerometer" android:required="true" />
+    <uses-feature android:name="android.hardware.sensor.gyroscope" android:required="true" />
+    <uses-feature android:name="android.hardware.sensor.compass" android:required="true" />
 
     <application
         android:allowBackup="true"
@@ -30,12 +35,12 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyDLG4UBlqCpFdIMeKJ2jAds_8JqrrD1LG8" />
 
-        <!-- ARCore を使うアプリであることを宣言（将来のAR機能用、現在はオプション） -->
+        <!-- ARCore を使うアプリであることを宣言 -->
         <meta-data
             android:name="com.google.ar.core"
-            android:value="optional" />
+            android:value="required" />
 
-        <!-- メインアクティビティ（MainActivity に修正） -->
+        <!-- メインアクティビティ -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -47,7 +52,6 @@
             </intent-filter>
         </activity>
 
-        <!-- 将来のAR体験用のアクティビティ（現在はコメントアウト） -->
         <!-- ARナビゲーション用のアクティビティ -->
         <activity
             android:name=".ArNavigationActivity"

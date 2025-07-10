@@ -11,3 +11,4 @@
     <string name="location_permission_required">位置情報の権限が必要です</string>
     <string name="current_location_unavailable">現在地を取得できません</string>
 </resources>
+
