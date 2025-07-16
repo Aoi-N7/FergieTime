@@ -1,47 +1,40 @@
 package com.example.fergietime
 
+import android.graphics.Color
 import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import com.example.fergietime.ui.theme.FergieTimeTheme
+import android.widget.Button
+import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
+import androidx.constraintlayout.widget.ConstraintLayout
 
-class MainActivity : ComponentActivity() {
+class MainActivity : AppCompatActivity() {
+
+    private var isDarkTheme = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContent {
-            FergieTimeTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "FergieTimea",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+        setContentView(R.layout.activity_main)
+
+        val layout = findViewById<ConstraintLayout>(R.id.rootLayout)
+        val textView = findViewById<TextView>(R.id.textView)
+        val button = findViewById<Button>(R.id.buttonSwitchTheme)
+
+        button.setOnClickListener {
+            isDarkTheme = !isDarkTheme
+
+            if (isDarkTheme) {
+                textView.text = "ダークテーマが有効"
+                layout.setBackgroundColor(Color.BLACK)
+                textView.setTextColor(Color.WHITE)
+                button.setBackgroundColor(Color.DKGRAY)
+                button.setTextColor(Color.WHITE)
+            } else {
+                textView.text = "ライトテーマが有効"
+                layout.setBackgroundColor(Color.WHITE)
+                textView.setTextColor(Color.BLACK)
+                button.setBackgroundColor(Color.LTGRAY)
+                button.setTextColor(Color.BLACK)
             }
         }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    FergieTimeTheme {
-        Greeting("Android")
     }
 }
