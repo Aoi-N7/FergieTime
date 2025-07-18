@@ -13,6 +13,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import android.content.Context
 import com.example.fergietime.ui.theme.FergieTimeTheme
+import com.mapbox.maps.MapView
 
 class MainActivity : ComponentActivity() {
 
@@ -46,6 +47,7 @@ class MainActivity : ComponentActivity() {
                     )
                 }
             }
+
         }
     }
 }
@@ -68,6 +70,13 @@ fun GreetingScreen(
         }
 
     }
+}
+
+@Composable
+fun MapComposable(activity: ComponentActivity) {
+    AndroidView(factory = {
+        setupNavigationMap(activity)
+    })
 }
 
 @Preview(showBackground = true)
