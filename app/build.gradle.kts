@@ -1,5 +1,13 @@
 import java.util.Properties     // local.propertiesファイルからプロパティを読み込む
 
+
+// local.propertiesファイルからプロパティを読み込む
+val localProperties = Properties()
+localProperties.load(rootProject.file("local.properties").inputStream())
+val mapboxAccessToken = localProperties.getProperty("MAPBOX_ACCESS_TOKEN") ?: ""
+println("MAPBOX_ACCESS_TOKEN from local.properties: $mapboxAccessToken")
+
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -22,13 +30,11 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        // local.propertiesファイルからプロパティを読み込む
-        val localProperties = Properties()
-        localProperties.load(rootProject.file("local.properties").inputStream())
+
 
         // MapboxのアクセストークンをBuildConfigに埋め込む（コード内でBuildConfig.MAPBOX_ACCESS_TOKENとしてアクセス可能）
-        buildConfigField("String", "MAPBOX_ACCESS_TOKEN", "\"${localProperties.getProperty("MAPBOX_ACCESS_TOKEN")}\"")
-        resValue("string", "mapbox_access_token", "\"${localProperties.getProperty("MAPBOX_ACCESS_TOKEN")}\"")
+        buildConfigField("String", "MAPBOX_ACCESS_TOKEN", "\"$mapboxAccessToken\"")
+        resValue("string", "mapbox_access_token", "\"$mapboxAccessToken\"")
 
     }
 
@@ -65,6 +71,8 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.play.services.maps)
+    implementation(libs.material)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -87,11 +95,28 @@ dependencies {
     // Mapbox
 //    implementation("com.mapbox.maps:android:11.0.0") // MapboxのコアSDK
 //    implementation("com.mapbox.maps:extension-compose:11.0.0") // Jetpack Compose用の拡張
-    implementation("com.mapbox.maps:android:11.13.1")
-    // Compose を使用する場合、Compose 拡張機能も追加します。
+//    implementation("com.mapbox.maps:android:11.13.1")
+//    // Compose を使用する場合、Compose 拡張機能も追加します。
+//    implementation("com.mapbox.extension:maps-compose:11.13.1")
+//    implementation("com.mapbox.navigation:android:3.10.0")
+//    implementation("com.mapbox.navigationcore:ui-maps:3.10.0")
+//    implementation("com.mapbox.navigationcore:ui-components:3.10.0")
+//    implementation("com.mapbox.navigationcore:route:3.10.0")
+
+    //implementation("com.mapbox.maps:plugin-annotation:11.13.1")
+
+// Mapbox Maps SDK v11（最新）
+    implementation("com.mapbox.maps:android:10.15.0")
+//    implementation("com.mapbox.navigation:ui:3.10.0")
+    implementation("com.mapbox.navigationcore:android:3.11.0-beta.1")
+
+// Jetpack Compose 拡張（必要に応じて）
     implementation("com.mapbox.extension:maps-compose:11.13.1")
-    implementation("com.mapbox.navigationcore:android:3.10.0")
-    implementation("com.mapbox.maps:plugin-annotation:11.13.1")
+
+    //implementation("com.mapbox.navigation:android:3.10.0")
+    //implementation("com.mapbox.navigation:android:2.12.0")
+
+
 
 
 }

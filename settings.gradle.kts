@@ -21,6 +21,11 @@ dependencyResolutionManagement {
         // Mapboxのトークン取得とチェック
         val mapboxToken = providers.gradleProperty("MAPBOX_DOWNLOADS_TOKEN").orNull
 
+        // トークンの読み込み判定
+        if (mapboxToken == null) {
+            //throw GradleException("MAPBOX_DOWNLOADS_TOKEN is not set.")
+        }
+
         maven {
             url = uri("https://api.mapbox.com/downloads/v2/releases/maven")
             authentication {
