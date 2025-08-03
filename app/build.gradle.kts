@@ -43,7 +43,6 @@ android {
 }
 
 dependencies {
-
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -59,20 +58,21 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
-    //play-services-locationの依存関係を追加
+
+    // Google Play Location
     implementation("com.google.android.gms:play-services-location:21.0.1")
 
+    // Lifecycle
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.6.2")
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.6.2")
 
-
-    // Firebase
+    // Firebase BOM（これでバージョン統一）
     implementation(platform("com.google.firebase:firebase-bom:33.8.0"))
-    implementation("com.google.firebase:firebase-analytics-ktx")
-    implementation("com.google.firebase:firebase-storage-ktx")
-    implementation("com.google.firebase:firebase-core:21.1.1")
+
+    // Firebase Authentication + Firestore（必要なものだけ）
     implementation("com.google.firebase:firebase-auth-ktx")
-    implementation("com.google.android.gms:play-services-auth:20.7.0")
-    implementation ("com.google.firebase:firebase-database-ktx:20.1.0")
-    implementation ("com.google.firebase:firebase-database-ktx:21.0.0")
-    implementation("com.google.android.gms:play-services-auth:21.3.0")
     implementation("com.google.firebase:firebase-firestore-ktx")
+
+    // Analytics（使っている場合のみ）
+    implementation("com.google.firebase:firebase-analytics-ktx")
 }

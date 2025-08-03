@@ -5,81 +5,76 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp  // ← dp のために追加
 import com.example.fergietime.ui.theme.FergieTimeTheme
-import com.example.fergietime.LocationSensor  // ← LocationSensor のために追加
-
-
+import com.example.fergietime.CacheScreen
+import android.os.Build
+import android.content.pm.PackageManager
+import androidx.core.content.ContextCompat
+import com.google.firebase.FirebaseApp
 
 class MainActivity : ComponentActivity() {
+
+    // 位置情報取得・送信用のユーティリティクラス
     private lateinit var locationSensor: LocationSensor
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Firebase を初期化（FirestoreやAuthを使用するために必要）
+        FirebaseApp.initializeApp(this)
+
+        // ステータスバーとナビゲーションバーの描画をアプリ領域に拡張
         enableEdgeToEdge()
 
-        // LocationSensor 初期化 & 権限リクエスト
-        locationSensor = LocationSensor(this)
-        locationSensor.requestPermission()
-        locationSensor.requestCurrentLocation()
+        // 通知チャンネルを作成（API 26以上で必要）
+        Notice.createChannel(this)
 
-
-        setContent {
-            FergieTimeTheme {
-                var latitude by remember { mutableStateOf("未取得") }
-                var longitude by remember { mutableStateOf("未取得") }
-
-                // LiveData を observe する
-                DisposableEffect(Unit) {
-                    val observer = androidx.lifecycle.Observer { location: android.location.Location ->
-                        latitude = location.latitude.toString()
-                        longitude = location.longitude.toString()
-                    }
-                    locationSensor.location.observe(this@MainActivity, observer)
-
-                    onDispose {
-                        locationSensor.location.removeObserver(observer)
-                    }
-                }
-
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "FergieTimea",
-                        latitude = latitude,
-                        longitude = longitude,
-                        onRequestLocation = { locationSensor.fusedLocation() },
-                        modifier = Modifier.padding(innerPadding)
-                    )
-
-                }
+        // Android 13以上の場合、通知パーミッションの確認とリクエスト
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS)
+                != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), 1001)
             }
         }
-    }
-}
 
-@Composable
-fun Greeting(
-    name: String,
-    latitude: String,
-    longitude: String,
-    onRequestLocation: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Column(
-        modifier = modifier
-            .padding(16.dp)
-    ) {
-        Text(text = "Hello $name!")
-        Text("緯度: $latitude")
-        Text("経度: $longitude")
-        Spacer(modifier = Modifier.height(16.dp))
-        Button(onClick = onRequestLocation) {
-            Text("位置情報を取得")
+        // 位置情報の準備と取得
+        locationSensor = LocationSensor(this)
+        locationSensor.requestPermission()        // パーミッションリクエスト（初回のみ表示）
+        locationSensor.requestCurrentLocation()   // 現在地の取得を開始
+
+        // Jetpack Compose によるUIの構築
+        setContent {
+            FergieTimeTheme {
+                // 表示中の画面を管理するステート
+                var currentScreen by remember { mutableStateOf<Screen>(Screen.Location) }
+
+                // 画面遷移の判定とUI表示
+                when (currentScreen) {
+                    is Screen.Location -> LocationScreen(
+                        locationSensor = locationSensor,
+                        onNavigateTo = { currentScreen = it } // 他画面への遷移時に画面を更新
+                    )
+
+                    is Screen.Notification -> NotificationScreen(
+                        context = this,
+                        onBack = { currentScreen = Screen.Location } // 戻るボタン処理
+                    )
+
+                    is Screen.Cache -> CacheScreen(
+                        onBack = { currentScreen = Screen.Location }
+                    )
+
+                    is Screen.Login -> LoginScreen(
+                        onBack = { currentScreen = Screen.Location },
+                        onNavigateToRegister = { currentScreen = Screen.Register }
+                    )
+
+                    is Screen.Register -> RegisterScreen(
+                        onBack = { currentScreen = Screen.Login }
+                    )
+                }
+            }
         }
     }
 }

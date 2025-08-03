@@ -9,24 +9,35 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.*
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.GeoPoint
+import com.google.firebase.firestore.SetOptions
 
-class LocationSensor(val activity: MainActivity) {
+class LocationSensor(private val activity: Activity) {
 
-    // 位置情報が更新されたらこのLiveDataに格納する
-    private val _location: MutableLiveData<Location> = MutableLiveData<Location>()
+    // 位置情報を監視するためのLiveData（内部で更新される）
+    private val _location: MutableLiveData<Location> = MutableLiveData()
+
+    // 外部から読み取り専用としてアクセス可能なLiveData
     val location: LiveData<Location> = _location
 
+    // 一時的に保持する緯度と経度（Firestoreへ送信するために使用）
+    var savedLatitude: Double? = null
+    var savedLongitude: Double? = null
+
+    // 位置情報の使用許可をユーザーにリクエストする
     fun requestPermission() {
         val LOCATION_PERMISSION_REQUEST_CODE = 1001
 
-        val isAccept = ContextCompat.checkSelfPermission(
+        // 許可が与えられているか確認
+        val isGranted = ContextCompat.checkSelfPermission(
             activity,
             Manifest.permission.ACCESS_FINE_LOCATION
         ) == PackageManager.PERMISSION_GRANTED
 
-        if (!isAccept) {
+        // 許可されていない場合はリクエストダイアログを表示
+        if (!isGranted) {
             ActivityCompat.requestPermissions(
                 activity,
                 arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
@@ -35,70 +46,68 @@ class LocationSensor(val activity: MainActivity) {
         }
     }
 
-    fun fusedLocation() {
+    // 現在の位置情報を取得し、変数とLiveDataに保存する
+    fun fetchLocationAndStore() {
+        val fusedLocationClient = LocationServices.getFusedLocationProviderClient(activity)
 
-        // 最後に確認された位置情報を取得
-        val fusedLocationClient: FusedLocationProviderClient =
-            LocationServices.getFusedLocationProviderClient(activity)
-
-        // 一応権限のチェック
+        // パーミッションが与えられていない場合は何もしない
         if (ActivityCompat.checkSelfPermission(
                 activity,
                 Manifest.permission.ACCESS_FINE_LOCATION
             ) != PackageManager.PERMISSION_GRANTED
-            && ActivityCompat.checkSelfPermission(
-                activity,
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
         ) {
-            Log.d("LocationSensor","権限がない")
-            // 権限もらえないと困っちゃうなぁ
+            Log.d("LocationSensor", "位置情報の権限がありません")
             return
         }
 
-        // 位置情報を取得したらListenerが反応する
+        // 最後に取得された位置情報を取得する
         fusedLocationClient.lastLocation
-            .addOnSuccessListener(activity) { location ->
-                Log.d("LocationSensor","$location")
+            .addOnSuccessListener { location ->
                 if (location != null) {
+                    // 緯度・経度を変数に保存し、LiveDataにも設定
+                    savedLatitude = location.latitude
+                    savedLongitude = location.longitude
                     _location.postValue(location)
+                    Log.d("LocationSensor", "取得成功: 緯度=$savedLatitude 経度=$savedLongitude")
+                } else {
+                    Log.d("LocationSensor", "位置情報はnullでした")
                 }
+            }
+            .addOnFailureListener {
+                Log.w("LocationSensor", "位置情報の取得に失敗しました", it)
             }
     }
 
-    fun requestCurrentLocation() {
-        val client = LocationServices.getFusedLocationProviderClient(activity)
+    // 保存された位置情報をFirestoreに送信する
+    fun uploadStoredLocationToFirestore(userId: String) {
+        val lat = savedLatitude
+        val lng = savedLongitude
 
-        val request = com.google.android.gms.location.LocationRequest.Builder(
-            com.google.android.gms.location.Priority.PRIORITY_HIGH_ACCURACY,
-            1000L
-        )
-            //trueだと一定時間内に精度を満たせない → null が返る
-            .setWaitForAccurateLocation(false)
-            .setMaxUpdates(1)
-            .build()
+        // 緯度・経度がnullでないことを確認
+        if (lat != null && lng != null) {
+            // Firestoreのuserコレクションのドキュメントを参照
+            val db = FirebaseFirestore.getInstance()
+            val userRef = db.collection("user").document(userId)
 
-        if (ActivityCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION)
-            != PackageManager.PERMISSION_GRANTED
-        ) {
-            Log.d("LocationSensor", "権限がありません")
-            return
-        }
+            // GeoPoint形式で位置情報を作成
+            val geoPoint = GeoPoint(lat, lng)
+            val data = mapOf("location" to geoPoint)
 
-        client.requestLocationUpdates(
-            request,
-            object : com.google.android.gms.location.LocationCallback() {
-                override fun onLocationResult(result: com.google.android.gms.location.LocationResult) {
-                    result.lastLocation?.let {
-                        Log.d("LocationSensor", "現在位置取得: $it")
-                        _location.postValue(it)
-                    }
-                    client.removeLocationUpdates(this)
+            // データをFirestoreに送信（既存データに上書きしないようmergeオプションを使用）
+            userRef.set(data, SetOptions.merge())
+                .addOnSuccessListener {
+                    Log.d("Firestore", "Firestoreに位置情報を送信しました: $lat, $lng")
                 }
-            },
-            null
-        )
+                .addOnFailureListener { e ->
+                    Log.w("Firestore", "送信失敗", e)
+                }
+        } else {
+            Log.w("Firestore", "保存された位置情報が null です")
+        }
     }
 
-
+    // 外部から位置情報の取得をリクエストするメソッド（fetchLocationAndStoreの呼び出し）
+    fun requestCurrentLocation() {
+        fetchLocationAndStore()
+    }
 }
