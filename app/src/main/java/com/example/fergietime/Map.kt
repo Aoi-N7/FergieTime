@@ -1,250 +1,95 @@
-// 修正後コメントも随時追加予定
-
+// マップの表示（後々、現在値の取得、周辺の避難所の取得など追加予定）
 package com.example.fergietime
 
-import android.Manifest
-import android.annotation.SuppressLint
-import android.content.pm.PackageManager
-import android.os.Bundle
-import android.widget.Toast
-import androidx.activity.ComponentActivity
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.app.ActivityCompat
-import com.mapbox.api.directions.v5.models.RouteOptions
-import com.mapbox.common.location.Location
-import com.mapbox.geojson.Point
-import com.mapbox.maps.CameraOptions
-import com.mapbox.maps.EdgeInsets
-import com.mapbox.maps.MapView
-import com.mapbox.maps.plugin.LocationPuck2D
-import com.mapbox.maps.plugin.animation.camera
-import com.mapbox.maps.plugin.locationcomponent.createDefault2DPuck
-import com.mapbox.maps.plugin.locationcomponent.location
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
-import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
-import com.mapbox.navigation.base.options.NavigationOptions
-import com.mapbox.navigation.base.route.NavigationRoute
-import com.mapbox.navigation.base.route.NavigationRouterCallback
-import com.mapbox.navigation.base.route.RouterFailure
-import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.core.directions.session.RoutesObserver
-import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
-import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
-import com.mapbox.navigation.core.lifecycle.requireMapboxNavigation
-import com.mapbox.navigation.core.replay.route.ReplayProgressObserver
-import com.mapbox.navigation.core.replay.route.ReplayRouteMapper
-import com.mapbox.navigation.core.trip.session.LocationMatcherResult
-import com.mapbox.navigation.core.trip.session.LocationObserver
-import com.mapbox.navigation.ui.maps.camera.NavigationCamera
-import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource
-import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
-import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi
-import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
-import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineApiOptions
-import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineViewOptions
-import com.example.fergietime.ui.theme.FergieTimeTheme
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+import com.google.android.gms.maps.model.*
+import com.google.maps.android.compose.*
 
-class MapActivity : ComponentActivity() {
-    private lateinit var mapView: MapView
-    private lateinit var viewportDataSource: MapboxNavigationViewportDataSource
-    private lateinit var navigationCamera: NavigationCamera
-    private lateinit var routeLineApi: MapboxRouteLineApi
-    private lateinit var routeLineView: MapboxRouteLineView
-    private lateinit var replayProgressObserver: ReplayProgressObserver
-    private val navigationLocationProvider = NavigationLocationProvider()
-    private val replayRouteMapper = ReplayRouteMapper()
+@Composable
+fun MapScreen() {
+    // 出発地点（元町駅）の緯度経度
+    val origin = LatLng(34.6896, 135.1873)
 
-    // 位置情報パーミッションの取得結果を処理するランチャー
-    private val locationPermissionRequest =
-        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
-                permissions ->
-            when {
-                permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true -> {
-                    initializeMapComponents()
-                }
-                else -> {
-                    Toast.makeText(
-                        this,
-                        "Location permissions denied. Please enable permissions in settings.",
-                        Toast.LENGTH_LONG
-                    )
-                        .show()
-                }
-            }
-        }
+    // 到着地点（三ノ宮駅）の緯度経度
+    val destination = LatLng(34.6950, 135.1956)
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    // カメラの初期位置を設定（出発地点を中心にズームレベル14.5）
+    val cameraPositionState = rememberCameraPositionState {
+        position = CameraPosition.fromLatLngZoom(origin, 14.5f)
+    }
 
-// 位置情報パーミッションの確認とリクエスト
-        if (
-            ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) ==
-            PackageManager.PERMISSION_GRANTED
-        ) {
-// パーミッションはすでに許可されている
-            initializeMapComponents()
-        } else {
-// 位置情報パーミッションをリクエストする
-            locationPermissionRequest.launch(arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION))
+    // ルート取得などのユーティリティクラスをインスタンス化
+    val repository = remember { MapUtils() }
+
+    // ルートの座標リスト（Polyline描画用）
+    var routePoints by remember { mutableStateOf<List<LatLng>>(emptyList()) }
+
+    // 所要時間のテキスト（徒歩時間など）
+    var durationText by remember { mutableStateOf("") }
+
+    // ルート表示のトリガー（ボタンでtrueになる）
+    var showRoute by remember { mutableStateOf(false) }
+
+    // 出発地点のマーカー状態
+    val originMarkerState = remember { MarkerState(position = origin) }
+
+    // 到着地点のマーカー状態
+    val destinationMarkerState = remember { MarkerState(position = destination) }
+
+    // showRouteがtrueになったときにルート情報を取得
+    LaunchedEffect(showRoute) {
+        if (showRoute) {
+            // Google Directions APIを使ってルートのPolyline座標を取得
+            routePoints = repository.fetchRoutePolyline(origin, destination, BuildConfig.MAPS_API_KEY)
+
+            // 所要時間（徒歩）を取得
+            durationText = repository.fetchDuration(origin, destination, BuildConfig.MAPS_API_KEY)
+
+            // 到着地点のマーカーに情報ウィンドウを表示
+            destinationMarkerState.showInfoWindow()
         }
     }
 
-    private fun initializeMapComponents() {
-// 新しい Mapbox 地図を作成する
-        mapView = MapView(this)
-        mapView.mapboxMap.setCamera(
-            CameraOptions.Builder()
-                .center(Point.fromLngLat(135.19473686, 34.69448637))
-                .zoom(14.0)
-                .build()
-        )
+    // 画面全体に地図とUIを配置
+    Box(modifier = Modifier.fillMaxSize()) {
+        // Google Mapの表示
+        GoogleMap(
+            modifier = Modifier.fillMaxSize(),
+            cameraPositionState = cameraPositionState
+        ) {
+            // 出発地点のマーカー（元町駅）
+            Marker(state = originMarkerState, title = "元町駅")
 
-// navigationLocationProvider をデータソースとして位置表示アイコンを初期化
-        mapView.location.apply {
-            setLocationProvider(navigationLocationProvider)
-            locationPuck = LocationPuck2D()
-            enabled = true
-        }
-
-        setContentView(mapView)
-
-// navigationCamera の表示領域を制御する viewportDataSource を設定
-        viewportDataSource = MapboxNavigationViewportDataSource(mapView.mapboxMap)
-
-// ナビゲーションカメラのパディングを設定
-        val pixelDensity = this.resources.displayMetrics.density
-        viewportDataSource.followingPadding =
-            EdgeInsets(
-                180.0 * pixelDensity,
-                40.0 * pixelDensity,
-                150.0 * pixelDensity,
-                40.0 * pixelDensity
+            // 到着地点のマーカー（三ノ宮駅）
+            // 所要時間が取得できていればスニペットとして表示
+            Marker(
+                state = destinationMarkerState,
+                title = "三ノ宮駅",
+                snippet = if (durationText.isNotEmpty()) "所要時間（徒歩）: $durationText" else null
             )
 
-// NavigationCamera を初期化
-        navigationCamera = NavigationCamera(mapView.mapboxMap, mapView.camera, viewportDataSource)
-
-// 地図上にルートを描画するための API とビューを初期化
-        routeLineApi = MapboxRouteLineApi(MapboxRouteLineApiOptions.Builder().build())
-        routeLineView = MapboxRouteLineView(MapboxRouteLineViewOptions.Builder(this).build())
-    }
-
-    // ルートオブザーバーは地図上にルート線と出発地/目的地の円を描画する
-    private val routesObserver = RoutesObserver { routeUpdateResult ->
-        if (routeUpdateResult.navigationRoutes.isNotEmpty()) {
-// ルートの形状を非同期で生成し描画する
-            routeLineApi.setNavigationRoutes(routeUpdateResult.navigationRoutes) { value ->
-                mapView.mapboxMap.style?.apply { routeLineView.renderRouteDrawData(this, value) }
-            }
-
-// 新しいルートを含むように viewportSourceData を更新する
-            viewportDataSource.onRouteChanged(routeUpdateResult.navigationRoutes.first())
-            viewportDataSource.evaluate()
-
-// ナビゲーションカメラを OVERVIEW モードに設定する
-            navigationCamera.requestNavigationCameraToOverview()
-        }
-    }
-
-    // locationObserver は位置表示アイコンとカメラをユーザーの位置に追従させる
-    private val locationObserver =
-        object : LocationObserver {
-            override fun onNewRawLocation(rawLocation: Location) {}
-
-            override fun onNewLocationMatcherResult(locationMatcherResult: LocationMatcherResult) {
-                val enhancedLocation = locationMatcherResult.enhancedLocation
-// 地図上の位置表示アイコンの位置を更新する
-                navigationLocationProvider.changePosition(
-                    location = enhancedLocation,
-                    keyPoints = locationMatcherResult.keyPoints,
-                )
-
-// カメラが位置に追従するように viewportDataSource を更新する
-                viewportDataSource.onLocationChanged(enhancedLocation)
-                viewportDataSource.evaluate()
-
-// ナビゲーションカメラを FOLLOWING モードに設定する
-                navigationCamera.requestNavigationCameraToFollowing()
+            // ルートが取得できていればPolylineで地図上に描画
+            if (routePoints.isNotEmpty()) {
+                Polyline(points = routePoints, color = Color.Blue, width = 8f)
             }
         }
 
-    // MapboxNavigation を定義する
-    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
-    private val mapboxNavigation: MapboxNavigation by
-    requireMapboxNavigation(
-        onResumedObserver =
-        object : MapboxNavigationObserver {
-            @SuppressLint("MissingPermission")
-            override fun onAttached(mapboxNavigation: MapboxNavigation) {
-// オブザーバーを登録する
-                mapboxNavigation.registerRoutesObserver(routesObserver)
-                mapboxNavigation.registerLocationObserver(locationObserver)
-
-                replayProgressObserver =
-                    ReplayProgressObserver(mapboxNavigation.mapboxReplayer)
-                mapboxNavigation.registerRouteProgressObserver(replayProgressObserver)
-                mapboxNavigation.startReplayTripSession()
+        // 画面下部にルート案内開始ボタンを配置(他メンバーとの結合後調整)
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+                .align(Alignment.BottomCenter)
+        ) {
+            Button(onClick = { showRoute = true }) {
+                Text("ルート案内を開始")
             }
-
-            override fun onDetached(mapboxNavigation: MapboxNavigation) {}
-        },
-        onInitialize = this::initNavigation
-    )
-
-    // MapboxNavigation の初期化時に、2地点間のルートをリクエストする
-    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
-    private fun initNavigation() {
-        MapboxNavigationApp.setup(NavigationOptions.Builder(this).build())
-
-// 位置表示アイコンを初期化する
-        mapView.location.apply {
-            setLocationProvider(navigationLocationProvider)
-            this.locationPuck = createDefault2DPuck()
-            enabled = true
         }
-
-        val origin = Point.fromLngLat(135.19473686, 34.69448637) // 三ノ宮駅
-        val destination = Point.fromLngLat(135.190716, 34.689487) // 元町駅
-
-        mapboxNavigation.requestRoutes(
-            RouteOptions.builder()
-                .applyDefaultNavigationOptions()
-                .coordinatesList(listOf(origin, destination))
-                .layersList(listOf(mapboxNavigation.getZLevel(), null))
-                .build(),
-            object : NavigationRouterCallback {
-                override fun onCanceled(routeOptions: RouteOptions, routerOrigin: String) {}
-
-                override fun onFailure(reasons: List<RouterFailure>, routeOptions: RouteOptions) {}
-
-                override fun onRoutesReady(routes: List<NavigationRoute>, routerOrigin: String) {
-                    mapboxNavigation.setNavigationRoutes(routes)
-
-// ユーザーの移動をシミュレーションで開始する
-                    val replayData =
-                        replayRouteMapper.mapDirectionsRouteGeometry(routes.first().directionsRoute)
-                    mapboxNavigation.mapboxReplayer.pushEvents(replayData)
-                    mapboxNavigation.mapboxReplayer.seekTo(replayData[0])
-                    mapboxNavigation.mapboxReplayer.play()
-                }
-            }
-        )
     }
-}
-
-// Mapbox の地図とナビゲーションを初期化する関数
-fun setupNavigationMap(activity: ComponentActivity): MapView {
-    val mapView = MapView(activity)
-    mapView.mapboxMap.setCamera(
-        CameraOptions.Builder()
-            .center(Point.fromLngLat(135.19473686, 34.69448637))
-            .zoom(14.0)
-            .build()
-    )
-    mapView.location.apply {
-        setLocationProvider(NavigationLocationProvider())
-        locationPuck = LocationPuck2D()
-        enabled = true
-    }
-    return mapView
 }

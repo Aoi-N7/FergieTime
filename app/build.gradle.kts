@@ -2,16 +2,19 @@ import java.util.Properties     // local.propertiesファイルからプロパ�
 
 
 // local.propertiesファイルからプロパティを読み込む
-val localProperties = Properties()
-localProperties.load(rootProject.file("local.properties").inputStream())
-val mapboxAccessToken = localProperties.getProperty("MAPBOX_ACCESS_TOKEN") ?: ""
-println("MAPBOX_ACCESS_TOKEN from local.properties: $mapboxAccessToken")
+//val localProperties = Properties()
+//localProperties.load(rootProject.file("local.properties").inputStream())
+//val mapboxAccessToken = localProperties.getProperty("MAPBOX_ACCESS_TOKEN") ?: ""
+//println("MAPBOX_ACCESS_TOKEN from local.properties: $mapboxAccessToken")
 
 
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+
+    // MapsSDK
+    id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
 
     // Firebaseプラグインの追加
     id("com.google.gms.google-services")
@@ -32,9 +35,21 @@ android {
 
 
 
-        // MapboxのアクセストークンをBuildConfigに埋め込む（コード内でBuildConfig.MAPBOX_ACCESS_TOKENとしてアクセス可能）
-        buildConfigField("String", "MAPBOX_ACCESS_TOKEN", "\"$mapboxAccessToken\"")
-        resValue("string", "mapbox_access_token", "\"$mapboxAccessToken\"")
+//        // MapboxのアクセストークンをBuildConfigに埋め込む（コード内でBuildConfig.MAPBOX_ACCESS_TOKENとしてアクセス可能）
+//        buildConfigField("String", "MAPBOX_ACCESS_TOKEN", "\"$mapboxAccessToken\"")
+//        resValue("string", "mapbox_access_token", "\"$mapboxAccessToken\"")
+
+        // map追記
+        val mapsApiKey = rootProject.properties["MAPS_API_KEY"] as? String ?: ""
+        manifestPlaceholders["MAPS_API_KEY"] = mapsApiKey
+
+        // local.properties ファイルからプロパティを読み込む
+        val localProperties = Properties()
+        localProperties.load(rootProject.file("local.properties").inputStream())
+
+        // build.gradle ファイルに API キーを追加
+        buildConfigField("String", "MAPS_API_KEY", "\"${localProperties.getProperty("MAPS_API_KEY")}\"")
+
 
     }
 
@@ -92,31 +107,14 @@ dependencies {
     implementation("com.google.android.gms:play-services-auth:21.3.0")
     implementation("com.google.firebase:firebase-firestore-ktx")
 
-    // Mapbox
-//    implementation("com.mapbox.maps:android:11.0.0") // MapboxのコアSDK
-//    implementation("com.mapbox.maps:extension-compose:11.0.0") // Jetpack Compose用の拡張
-//    implementation("com.mapbox.maps:android:11.13.1")
-//    // Compose を使用する場合、Compose 拡張機能も追加します。
-//    implementation("com.mapbox.extension:maps-compose:11.13.1")
-//    implementation("com.mapbox.navigation:android:3.10.0")
-//    implementation("com.mapbox.navigationcore:ui-maps:3.10.0")
-//    implementation("com.mapbox.navigationcore:ui-components:3.10.0")
-//    implementation("com.mapbox.navigationcore:route:3.10.0")
+    //Google Map API
+    implementation("com.google.maps.android:maps-compose:6.1.0")
+    implementation("com.google.android.gms:play-services-maps:19.0.0")
+    implementation("com.google.maps.android:android-maps-utils:2.2.5")
 
-    //implementation("com.mapbox.maps:plugin-annotation:11.13.1")
-
-// Mapbox Maps SDK v11（最新）
-    implementation("com.mapbox.maps:android:10.15.0")
-//    implementation("com.mapbox.navigation:ui:3.10.0")
-    implementation("com.mapbox.navigationcore:android:3.11.0-beta.1")
-
-// Jetpack Compose 拡張（必要に応じて）
-    implementation("com.mapbox.extension:maps-compose:11.13.1")
-
-    //implementation("com.mapbox.navigation:android:3.10.0")
-    //implementation("com.mapbox.navigation:android:2.12.0")
-
-
+    // Google Directions API
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation("org.json:json:20240303") // JSONパース用
 
 
 }

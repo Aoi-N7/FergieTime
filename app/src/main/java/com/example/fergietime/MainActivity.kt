@@ -14,7 +14,6 @@ import androidx.compose.ui.unit.dp
 import android.content.Context
 import androidx.compose.ui.viewinterop.AndroidView
 import com.example.fergietime.ui.theme.FergieTimeTheme
-import com.mapbox.maps.MapView
 
 class MainActivity : ComponentActivity() {
 

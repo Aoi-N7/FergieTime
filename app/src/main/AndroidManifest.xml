@@ -27,10 +27,10 @@
         tools:targetApi="31">
 
 
-        <!-- Mapboxのアクセストークンを指定するためのメタデータ -->
+        <!-- Google Map APIのアクセストークンを指定するためのメタデータ -->
         <meta-data
-        android:name="com.mapbox.maps.token"
-        android:value="@string/mapbox_access_token" />
+            android:name="com.google.android.geo.API_KEY"
+            android:value="${MAPS_API_KEY}" />
 
 
         <activity
