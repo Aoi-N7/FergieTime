@@ -5,6 +5,7 @@ plugins {
     id("org.jetbrains.kotlin.android") version "1.8.20" apply false
 }
 
+
 // プロジェクト全体で使用する変数を定義
 extra.apply {
     set("compose_version", "1.4.6")  // 1.5.3から1.4.6に変更（Kotlin 1.8.20と互換）

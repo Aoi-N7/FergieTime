@@ -1,16 +1,18 @@
 package com.example.fergietime
 
-
 import android.Manifest
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -28,33 +30,76 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.app.ActivityCompat
+import com.google.android.gms.common.ConnectionResult
+import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
-import androidx.compose.material3.MaterialTheme
 import com.google.android.gms.maps.GoogleMapOptions
 import com.google.android.gms.maps.MapView
 import com.google.android.gms.maps.model.*
 import kotlin.math.*
-import androidx.compose.foundation.clickable
-import android.content.Intent
-import android.util.Log
-import com.google.android.gms.common.ConnectionResult
-import com.google.android.gms.common.GoogleApiAvailability
 
-// シンプルな避難所データクラス
-data class SimpleShelter(
+// ================== DATA CLASSES ==================
+
+// 避難場所の種類
+enum class ShelterType {
+    ELEMENTARY_SCHOOL,
+    MIDDLE_SCHOOL,
+    HIGH_SCHOOL,
+    COMMUNITY_CENTER,
+    GYMNASIUM,
+    PARK,
+    OTHER
+}
+
+// 避難場所の種類（詳細版）
+enum class EvacuationSiteType {
+    DESIGNATED_EMERGENCY_EVACUATION_SITE,  // 指定緊急避難場所
+    DESIGNATED_EVACUATION_SHELTER,         // 指定避難所
+    TSUNAMI_EVACUATION_BUILDING,           // 津波避難ビル
+    WIDE_AREA_EVACUATION_SITE,            // 広域避難場所
+    TEMPORARY_EVACUATION_SITE,             // 一時避難場所
+    WELFARE_EVACUATION_SHELTER             // 福祉避難所
+}
+
+// 災害の種類
+enum class DisasterType {
+    FLOOD,          // 洪水
+    LANDSLIDE,      // 土砂災害
+    HIGH_TIDE,      // 高潮
+    EARTHQUAKE,     // 地震
+    TSUNAMI,        // 津波
+    FIRE,           // 火災
+    INLAND_FLOOD    // 内水氾濫
+}
+
+// 統一された避難場所データクラス
+data class EvacuationShelter(
     val id: String,
     val name: String,
     val address: String,
     val position: LatLng,
     val capacity: Int,
-    val info: String
+    val shelterType: ShelterType = ShelterType.OTHER,
+    val siteType: EvacuationSiteType = EvacuationSiteType.DESIGNATED_EVACUATION_SHELTER,
+    val applicableDisasters: List<DisasterType> = listOf(DisasterType.EARTHQUAKE),
+    val facilities: List<String> = emptyList(),
+    val phoneNumber: String? = null,
+    val isBarrierFree: Boolean = false,
+    val hasPetSupport: Boolean = false,
+    val prefecture: String = "",
+    val city: String = "",
+    val ward: String? = null,
+    val isOpen: Boolean = true,
+    val isOpen24Hours: Boolean = true,
+    val notes: String? = null,
+    val distance: Float = 0f
 )
 
 // 距離付き避難所データクラス
 data class ShelterWithDistance(
-    val shelter: SimpleShelter,
+    val shelter: EvacuationShelter,
     val distance: Double
 )
 
@@ -63,106 +108,208 @@ class MainActivity : ComponentActivity() {
     private var mapView: MapView? = null
     private var currentLocation: Location? = null
 
-    // サンプル避難所データ（東京都渋谷区周辺 + 兵庫県神戸市三ノ宮駅周辺）
+    // ================== SHELTER DATA ==================
+
+    // 避難所データ（東京都渋谷区周辺 + 兵庫県神戸市三ノ宮駅周辺）
     private val shelters = listOf(
         // 東京都渋谷区周辺
-        SimpleShelter(
-            id = "1",
+        EvacuationShelter(
+            id = "tokyo_001",
             name = "渋谷区立中央小学校",
             address = "東京都渋谷区○○1-1-1",
             position = LatLng(35.6762, 139.6503),
             capacity = 500,
-            info = "体育館、校庭、給水設備、非常用電源"
+            shelterType = ShelterType.ELEMENTARY_SCHOOL,
+            siteType = EvacuationSiteType.DESIGNATED_EVACUATION_SHELTER,
+            applicableDisasters = listOf(DisasterType.EARTHQUAKE, DisasterType.FIRE, DisasterType.FLOOD),
+            facilities = listOf("体育館", "校庭", "給水設備", "非常用電源", "医務室"),
+            phoneNumber = "03-1234-5678",
+            isBarrierFree = true,
+            prefecture = "東京都",
+            city = "東京都",
+            ward = "渋谷区"
         ),
-        SimpleShelter(
-            id = "2",
+        EvacuationShelter(
+            id = "tokyo_002",
             name = "代々木公園",
-            address = "東京都渋谷区△△2-2-2",
-            position = LatLng(35.6794, 139.6569),
-            capacity = 300,
-            info = "一時避難場所、広場、トイレ、水道"
+            address = "東京都渋谷区代々木神園町2-1",
+            position = LatLng(35.6732, 139.6958),
+            capacity = 10000,
+            shelterType = ShelterType.PARK,
+            siteType = EvacuationSiteType.WIDE_AREA_EVACUATION_SITE,
+            applicableDisasters = listOf(DisasterType.EARTHQUAKE, DisasterType.FIRE),
+            facilities = listOf("広場", "トイレ", "水道", "防災倉庫", "ヘリポート"),
+            isBarrierFree = true,
+            hasPetSupport = true,
+            prefecture = "東京都",
+            city = "東京都",
+            ward = "渋谷区"
         ),
-        SimpleShelter(
-            id = "3",
+        EvacuationShelter(
+            id = "tokyo_003",
             name = "渋谷区民会館",
             address = "東京都渋谷区□□3-3-3",
             position = LatLng(35.6731, 139.6448),
             capacity = 200,
-            info = "会議室、調理室、医務室、非常用電源"
+            shelterType = ShelterType.COMMUNITY_CENTER,
+            siteType = EvacuationSiteType.DESIGNATED_EVACUATION_SHELTER,
+            applicableDisasters = listOf(DisasterType.EARTHQUAKE, DisasterType.FIRE),
+            facilities = listOf("会議室", "調理室", "医務室", "非常用電源"),
+            phoneNumber = "03-2345-6789",
+            isBarrierFree = true,
+            prefecture = "東京都",
+            city = "東京都",
+            ward = "渋谷区"
         ),
-        SimpleShelter(
-            id = "4",
+        EvacuationShelter(
+            id = "tokyo_004",
             name = "恵比寿ガーデンプレイス",
             address = "東京都渋谷区恵比寿4-20-3",
             position = LatLng(35.6640, 139.7130),
             capacity = 400,
-            info = "一時避難場所、広場"
+            shelterType = ShelterType.OTHER,
+            siteType = EvacuationSiteType.TEMPORARY_EVACUATION_SITE,
+            applicableDisasters = listOf(DisasterType.EARTHQUAKE, DisasterType.FIRE),
+            facilities = listOf("一時避難場所", "広場"),
+            isBarrierFree = true,
+            prefecture = "東京都",
+            city = "東京都",
+            ward = "渋谷区"
         ),
 
         // 兵庫県神戸市三ノ宮駅周辺
-        SimpleShelter(
-            id = "5",
+        EvacuationShelter(
+            id = "kobe_001",
             name = "神戸市立中央小学校",
             address = "兵庫県神戸市中央区中山手通4-23-2",
             position = LatLng(34.6937, 135.1955),
             capacity = 600,
-            info = "体育館、校庭、給水設備、非常用電源、医務室"
+            shelterType = ShelterType.ELEMENTARY_SCHOOL,
+            siteType = EvacuationSiteType.DESIGNATED_EVACUATION_SHELTER,
+            applicableDisasters = listOf(DisasterType.EARTHQUAKE, DisasterType.FLOOD, DisasterType.LANDSLIDE, DisasterType.FIRE),
+            facilities = listOf("体育館", "校庭", "教室", "給水設備", "非常用電源", "医務室"),
+            phoneNumber = "078-221-4768",
+            isBarrierFree = true,
+            prefecture = "兵庫県",
+            city = "神戸市",
+            ward = "中央区"
         ),
-        SimpleShelter(
-            id = "6",
+        EvacuationShelter(
+            id = "kobe_002",
             name = "東遊園地",
             address = "兵庫県神戸市中央区加納町6-4-1",
             position = LatLng(34.6851, 135.1947),
-            capacity = 1000,
-            info = "広域避難場所、広場、トイレ、水道、防災倉庫"
+            capacity = 2000,
+            shelterType = ShelterType.PARK,
+            siteType = EvacuationSiteType.WIDE_AREA_EVACUATION_SITE,
+            applicableDisasters = listOf(DisasterType.EARTHQUAKE, DisasterType.FIRE, DisasterType.TSUNAMI),
+            facilities = listOf("広場", "トイレ", "水道", "防災倉庫", "ヘリポート"),
+            isBarrierFree = true,
+            hasPetSupport = true,
+            prefecture = "兵庫県",
+            city = "神戸市",
+            ward = "中央区",
+            notes = "広域避難場所・ヘリポート利用可能"
         ),
-        SimpleShelter(
-            id = "7",
+        EvacuationShelter(
+            id = "kobe_003",
             name = "神戸市役所",
             address = "兵庫県神戸市中央区加納町6-5-1",
             position = LatLng(34.6851, 135.1956),
             capacity = 800,
-            info = "災害対策本部、会議室、非常用電源、通信設備"
+            shelterType = ShelterType.OTHER,
+            siteType = EvacuationSiteType.DESIGNATED_EVACUATION_SHELTER,
+            applicableDisasters = listOf(DisasterType.EARTHQUAKE, DisasterType.FIRE, DisasterType.FLOOD),
+            facilities = listOf("災害対策本部", "会議室", "非常用電源", "通信設備", "給水設備"),
+            phoneNumber = "078-331-8181",
+            isBarrierFree = true,
+            prefecture = "兵庫県",
+            city = "神戸市",
+            ward = "中央区",
+            notes = "災害対策本部設置場所"
         ),
-        SimpleShelter(
-            id = "8",
+        EvacuationShelter(
+            id = "kobe_004",
             name = "兵庫県公館",
             address = "兵庫県神戸市中央区下山手通4-4-1",
             position = LatLng(34.6918, 135.1889),
             capacity = 300,
-            info = "会議室、ホール、非常用電源"
+            shelterType = ShelterType.OTHER,
+            siteType = EvacuationSiteType.DESIGNATED_EVACUATION_SHELTER,
+            applicableDisasters = listOf(DisasterType.EARTHQUAKE, DisasterType.FIRE),
+            facilities = listOf("会議室", "ホール", "非常用電源", "給水設備"),
+            phoneNumber = "078-341-7711",
+            isBarrierFree = true,
+            prefecture = "兵庫県",
+            city = "神戸市",
+            ward = "中央区"
         ),
-        SimpleShelter(
-            id = "9",
+        EvacuationShelter(
+            id = "kobe_005",
             name = "神戸国際会館",
             address = "兵庫県神戸市中央区御幸通8-1-6",
             position = LatLng(34.6919, 135.1975),
             capacity = 1200,
-            info = "大ホール、会議室、レストラン、非常用電源"
+            shelterType = ShelterType.OTHER,
+            siteType = EvacuationSiteType.DESIGNATED_EVACUATION_SHELTER,
+            applicableDisasters = listOf(DisasterType.EARTHQUAKE, DisasterType.FIRE, DisasterType.FLOOD),
+            facilities = listOf("大ホール", "会議室", "レストラン", "非常用電源", "給水設備"),
+            phoneNumber = "078-230-3300",
+            isBarrierFree = true,
+            prefecture = "兵庫県",
+            city = "神戸市",
+            ward = "中央区"
         ),
-        SimpleShelter(
-            id = "10",
+        EvacuationShelter(
+            id = "kobe_006",
             name = "生田神社",
             address = "兵庫県神戸市中央区下山手通1-2-1",
             position = LatLng(34.6919, 135.1947),
             capacity = 400,
-            info = "境内、社務所、トイレ、水道"
+            shelterType = ShelterType.OTHER,
+            siteType = EvacuationSiteType.TEMPORARY_EVACUATION_SITE,
+            applicableDisasters = listOf(DisasterType.EARTHQUAKE, DisasterType.FIRE),
+            facilities = listOf("境内", "社務所", "トイレ", "水道"),
+            phoneNumber = "078-321-3851",
+            isBarrierFree = false,
+            hasPetSupport = true,
+            prefecture = "兵庫県",
+            city = "神戸市",
+            ward = "中央区",
+            notes = "一時避難場所として利用"
         ),
-        SimpleShelter(
-            id = "11",
+        EvacuationShelter(
+            id = "kobe_007",
             name = "神戸市立葺合高等学校",
             address = "兵庫県神戸市中央区野崎通1-1-1",
             position = LatLng(34.6889, 135.2019),
             capacity = 700,
-            info = "体育館、校庭、教室、給水設備、非常用電源"
+            shelterType = ShelterType.HIGH_SCHOOL,
+            siteType = EvacuationSiteType.DESIGNATED_EVACUATION_SHELTER,
+            applicableDisasters = listOf(DisasterType.EARTHQUAKE, DisasterType.FLOOD, DisasterType.FIRE),
+            facilities = listOf("体育館", "校庭", "教室", "給水設備", "非常用電源", "医務室"),
+            phoneNumber = "078-291-0771",
+            isBarrierFree = true,
+            prefecture = "兵庫県",
+            city = "神戸市",
+            ward = "中央区"
         ),
-        SimpleShelter(
-            id = "12",
+        EvacuationShelter(
+            id = "kobe_008",
             name = "HAT神戸・なぎさ公園",
             address = "兵庫県神戸市中央区脇浜海岸通1-3",
             position = LatLng(34.7056, 135.2167),
-            capacity = 1500,
-            info = "広域避難場所、広場、防災施設、ヘリポート"
+            capacity = 2500,
+            shelterType = ShelterType.PARK,
+            siteType = EvacuationSiteType.WIDE_AREA_EVACUATION_SITE,
+            applicableDisasters = listOf(DisasterType.EARTHQUAKE, DisasterType.FIRE, DisasterType.TSUNAMI),
+            facilities = listOf("広場", "防災施設", "ヘリポート", "給水設備", "トイレ", "防災倉庫"),
+            isBarrierFree = true,
+            hasPetSupport = true,
+            prefecture = "兵庫県",
+            city = "神戸市",
+            ward = "中央区",
+            notes = "広域避難場所・津波避難可能・ヘリポート利用可能"
         )
     )
 
@@ -181,7 +328,7 @@ class MainActivity : ComponentActivity() {
     fun EvacuationNavApp() {
         val context = LocalContext.current
         var googleMapRef by remember { mutableStateOf<GoogleMap?>(null) }
-        var selectedShelter by remember { mutableStateOf<SimpleShelter?>(null) }
+        var selectedShelter by remember { mutableStateOf<EvacuationShelter?>(null) }
         var showShelterList by remember { mutableStateOf(false) }
         var currentLocationState by remember { mutableStateOf<Location?>(null) }
 
@@ -306,7 +453,7 @@ class MainActivity : ComponentActivity() {
                             },
                             containerColor = Color(0xFF38A169)
                         ) {
-                            Icon(Icons.Default.Navigation, contentDescription = "避難所情報")
+                            Icon(Icons.Default.Navigation, contentDescription = "ARナビ開始")
                         }
                     }
                 }
@@ -329,7 +476,6 @@ class MainActivity : ComponentActivity() {
                             modifier = Modifier.padding(12.dp),
                             color = if (currentLocationState != null) Color(0xFF38A169) else Color.Gray
                         )
-
                         LazyColumn(
                             modifier = Modifier.padding(horizontal = 8.dp)
                         ) {
@@ -359,7 +505,7 @@ class MainActivity : ComponentActivity() {
 
     @Composable
     fun ShelterListItem(
-        shelter: SimpleShelter,
+        shelter: EvacuationShelter,
         distance: Double?,
         isNearby: Boolean = false,
         onClick: () -> Unit
@@ -383,7 +529,7 @@ class MainActivity : ComponentActivity() {
                 Column(modifier = Modifier.weight(1f)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
-                            text = shelter.name,
+                            text = "${getShelterTypeIcon(shelter.shelterType)} ${shelter.name}",
                             fontWeight = FontWeight.Bold,
                             fontSize = 16.sp
                         )
@@ -400,12 +546,18 @@ class MainActivity : ComponentActivity() {
                         color = Color.Gray
                     )
                     Text(
-                        text = "収容人数: ${shelter.capacity}人",
+                        text = "収容人数: ${shelter.capacity}人 | ${getSiteTypeName(shelter.siteType)}",
                         fontSize = 12.sp,
                         color = Color.Gray
                     )
+                    if (shelter.facilities.isNotEmpty()) {
+                        Text(
+                            text = "設備: ${shelter.facilities.take(3).joinToString(", ")}",
+                            fontSize = 11.sp,
+                            color = Color.Blue
+                        )
+                    }
                 }
-
                 // 距離表示
                 distance?.let {
                     Column(horizontalAlignment = Alignment.End) {
@@ -428,6 +580,8 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    // ================== HELPER FUNCTIONS ==================
+
     private fun formatDistance(distance: Double): String {
         return when {
             distance < 1000 -> "${distance.toInt()}m"
@@ -436,7 +590,30 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun setupMap(googleMap: GoogleMap, onMarkerClick: (SimpleShelter) -> Unit) {
+    private fun getShelterTypeIcon(shelterType: ShelterType): String {
+        return when (shelterType) {
+            ShelterType.ELEMENTARY_SCHOOL -> "🏫"
+            ShelterType.MIDDLE_SCHOOL -> "🏫"
+            ShelterType.HIGH_SCHOOL -> "🏫"
+            ShelterType.COMMUNITY_CENTER -> "🏢"
+            ShelterType.GYMNASIUM -> "🏟️"
+            ShelterType.PARK -> "🏞️"
+            ShelterType.OTHER -> "🏛️"
+        }
+    }
+
+    private fun getSiteTypeName(siteType: EvacuationSiteType): String {
+        return when (siteType) {
+            EvacuationSiteType.DESIGNATED_EMERGENCY_EVACUATION_SITE -> "指定緊急避難場所"
+            EvacuationSiteType.DESIGNATED_EVACUATION_SHELTER -> "指定避難所"
+            EvacuationSiteType.TSUNAMI_EVACUATION_BUILDING -> "津波避難ビル"
+            EvacuationSiteType.WIDE_AREA_EVACUATION_SITE -> "広域避難場所"
+            EvacuationSiteType.TEMPORARY_EVACUATION_SITE -> "一時避難場所"
+            EvacuationSiteType.WELFARE_EVACUATION_SHELTER -> "福祉避難所"
+        }
+    }
+
+    private fun setupMap(googleMap: GoogleMap, onMarkerClick: (EvacuationShelter) -> Unit) {
         googleMap.uiSettings.apply {
             isZoomControlsEnabled = true
             isCompassEnabled = true
@@ -449,14 +626,21 @@ class MainActivity : ComponentActivity() {
                 MarkerOptions()
                     .position(shelter.position)
                     .title(shelter.name)
-                    .snippet("収容人数: ${shelter.capacity}人")
-                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED))
+                    .snippet("収容人数: ${shelter.capacity}人 | ${getSiteTypeName(shelter.siteType)}")
+                    .icon(BitmapDescriptorFactory.defaultMarker(
+                        when (shelter.siteType) {
+                            EvacuationSiteType.WIDE_AREA_EVACUATION_SITE -> BitmapDescriptorFactory.HUE_GREEN
+                            EvacuationSiteType.DESIGNATED_EMERGENCY_EVACUATION_SITE -> BitmapDescriptorFactory.HUE_ORANGE
+                            EvacuationSiteType.TSUNAMI_EVACUATION_BUILDING -> BitmapDescriptorFactory.HUE_BLUE
+                            else -> BitmapDescriptorFactory.HUE_RED
+                        }
+                    ))
             )
             marker?.tag = shelter
         }
 
         googleMap.setOnMarkerClickListener { marker ->
-            val shelter = marker.tag as? SimpleShelter
+            val shelter = marker.tag as? EvacuationShelter
             shelter?.let { onMarkerClick(it) }
             false
         }
@@ -550,7 +734,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun showShelterInfo(shelter: SimpleShelter, currentLoc: Location?) {
+    private fun showShelterInfo(shelter: EvacuationShelter, currentLoc: Location?) {
         currentLoc?.let { location ->
             val distance = calculateDistance(
                 location.latitude, location.longitude,
@@ -564,12 +748,16 @@ class MainActivity : ComponentActivity() {
                 putExtra("shelter_lng", shelter.position.longitude)
                 putExtra("user_lat", location.latitude)
                 putExtra("user_lng", location.longitude)
+                putExtra("shelter_capacity", shelter.capacity)
+                putExtra("shelter_facilities", shelter.facilities.joinToString(", "))
+                putExtra("shelter_phone", shelter.phoneNumber ?: "")
+                putExtra("shelter_address", shelter.address)
             }
             startActivity(intent)
         } ?: run {
             Toast.makeText(
                 this,
-                "${shelter.name}\n設備: ${shelter.info}",
+                "${shelter.name}\n${shelter.address}\n収容人数: ${shelter.capacity}人\n設備: ${shelter.facilities.joinToString(", ")}",
                 Toast.LENGTH_LONG
             ).show()
         }
@@ -631,3 +819,4 @@ class MainActivity : ComponentActivity() {
         mapView?.onLowMemory()
     }
 }
+
