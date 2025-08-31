@@ -1,0 +1,138 @@
+package com.example.fergietime
+
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.unit.sp
+import com.example.fergietime.auth.registerUser
+import android.util.Log
+import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
+
+@Composable
+fun RegisterScreen(onBack: () -> Unit) {
+    // メールアドレス入力用の状態
+    var email by remember { mutableStateOf("") }
+
+    // パスワード入力用の状態
+    var password by remember { mutableStateOf("") }
+
+    // 名前入力用の状態
+    var name by remember { mutableStateOf("") }
+
+    // エラーメッセージの表示状態
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+
+    // パスワードの表示切り替え状態
+    var passwordVisible by remember { mutableStateOf(false) }
+
+    // 画面全体のレイアウト
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        // 名前入力欄
+        OutlinedTextField(
+            value = name,
+            onValueChange = { name = it },
+            label = { Text("名前") },
+            leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        // メールアドレス入力欄
+        OutlinedTextField(
+            value = email,
+            onValueChange = { email = it },
+            label = { Text("メールアドレス") },
+            leadingIcon = { Icon(Icons.Default.Email, contentDescription = null) },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        // パスワード入力欄（目隠し切り替え付き）
+        OutlinedTextField(
+            value = password,
+            onValueChange = { password = it },
+            label = { Text("パスワード") },
+            leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null) },
+            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+            trailingIcon = {
+                val icon = if (passwordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility
+                val desc = if (passwordVisible) "非表示にする" else "表示する"
+                IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                    Icon(imageVector = icon, contentDescription = desc)
+                }
+            },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // 登録ボタンの処理
+        Button(
+            onClick = {
+                // 入力値のバリデーション処理
+                errorMessage = when {
+                    name.isBlank() || email.isBlank() || password.isBlank() ->
+                        "すべての項目を入力してください。"
+                    !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches() ->
+                        "正しいメールアドレスの形式で入力してください。"
+                    password.length < 6 ->
+                        "パスワードは6文字以上で入力してください。"
+                    else -> null
+                }
+
+                // エラーがなければ登録処理を呼び出す
+                if (errorMessage == null) {
+                    registerUser(email, password, name) { success, error ->
+                        if (success) {
+                            onBack()
+                        } else {
+                            errorMessage = error ?: "登録に失敗しました"
+                        }
+                    }
+                }
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("登録", fontWeight = FontWeight.Bold)
+        }
+
+        // エラーメッセージがある場合に表示する
+        errorMessage?.let {
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(it, color = MaterialTheme.colorScheme.error)
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // ログイン画面への案内リンク
+        Text(
+            "アカウントをお持ちの方はこちら",
+            color = MaterialTheme.colorScheme.primary,
+            fontSize = 12.sp,
+            modifier = Modifier
+                .clickable { onBack() }
+                .padding(top = 8.dp)
+        )
+    }
+}
