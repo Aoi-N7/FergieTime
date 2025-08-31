@@ -4,15 +4,14 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.fergietime.ui.theme.FergieTimeTheme
-import com.mapbox.maps.MapView
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -20,18 +19,25 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             FergieTimeTheme {
+
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Column(
+                    // Columnで縦に並べる
+                    androidx.compose.foundation.layout.Column(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(innerPadding)
                     ) {
-                        Greeting(name = "FergieTime")
+                        Greeting(name = "FergieTimea")
 
-                        MapComposable(activity = this@MainActivity)
+//                      mapView.getMapboxMap().loadStyleUri(Style.MAPBOX_STREETS) {
+//                            Log.d("Mapbox", "Style loaded successfully")
+//                         }
+
+                        MapScreen() // Mapを画面の残りに表示
                     }
                 }
             }
+
         }
     }
 }
@@ -42,13 +48,6 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
         text = "Hello $name!",
         modifier = modifier
     )
-}
-
-@Composable
-fun MapComposable(activity: ComponentActivity) {
-    AndroidView(factory = {
-        setupNavigationMap(activity)
-    })
 }
 
 @Preview(showBackground = true)

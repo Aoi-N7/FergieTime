@@ -8,5 +8,10 @@ plugins {
     id("com.google.gms.google-services") version "4.4.2" apply false
 }
 
-// local.propertiesからMAPBOX_ACCESS_TOKENを取得
-val MAPBOX_ACCESS_TOKEN: String = project.findProperty("MAPBOX_ACCESS_TOKEN") as? String ?: ""
+// Google Map API
+buildscript {
+    dependencies {
+        classpath("com.google.android.libraries.mapsplatform.secrets-gradle-plugin:secrets-gradle-plugin:2.0.1")
+        classpath("com.google.gms:google-services:4.3.10")
+    }
+}
