@@ -47,7 +47,7 @@ fun LoginScreen(onBack: () -> Unit,
 
         // アプリのロゴ（任意の画像に変更可）
         Image(
-            painter = painterResource(id = R.drawable.ic_launcher_foreground),
+            painter = painterResource(id = R.drawable.sinnromaru),
             contentDescription = "ロゴ",
             modifier = Modifier.size(120.dp)
         )
