@@ -2,23 +2,14 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-
     <!-- インターネットアクセスのパーミッションを追加 -->
     <uses-permission android:name="android.permission.INTERNET"/>
 
-    <!-- この権限は常に含める -->
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-
-    <!-- アプリが正確な位置情報アクセスから利益を得る場合のみ含める -->
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+
 
     <application
         android:allowBackup="true"
@@ -30,14 +21,6 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.FergieTime"
         tools:targetApi="31">
-
-
-        <!-- Google Map APIのアクセストークンを指定するためのメタデータ -->
-        <meta-data
-            android:name="com.google.android.geo.API_KEY"
-            android:value="${MAPS_API_KEY}" />
-
-
         <activity
             android:name=".MainActivity"
             android:exported="true"

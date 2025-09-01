@@ -1,13 +1,5 @@
 import java.util.Properties     // local.propertiesファイルからプロパティを読み込む
 
-
-// local.propertiesファイルからプロパティを読み込む
-//val localProperties = Properties()
-//localProperties.load(rootProject.file("local.properties").inputStream())
-//val mapboxAccessToken = localProperties.getProperty("MAPBOX_ACCESS_TOKEN") ?: ""
-//println("MAPBOX_ACCESS_TOKEN from local.properties: $mapboxAccessToken")
-
-
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -32,12 +24,6 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-
-
-
-//        // MapboxのアクセストークンをBuildConfigに埋め込む（コード内でBuildConfig.MAPBOX_ACCESS_TOKENとしてアクセス可能）
-//        buildConfigField("String", "MAPBOX_ACCESS_TOKEN", "\"$mapboxAccessToken\"")
-//        resValue("string", "mapbox_access_token", "\"$mapboxAccessToken\"")
 
         // map追記
         val mapsApiKey = rootProject.properties["MAPS_API_KEY"] as? String ?: ""
@@ -71,7 +57,6 @@ android {
     }
     buildFeatures {
         compose = true
-        buildConfig = true
     }
 }
 
@@ -96,16 +81,27 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
-    // Firebase
+    // Google Play Location
+    implementation("com.google.android.gms:play-services-location:21.0.1")
+
+    // Lifecycle
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.6.2")
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.6.2")
+
+    // Firebase BOM（これでバージョン統一）
     implementation(platform("com.google.firebase:firebase-bom:33.8.0"))
-    implementation("com.google.firebase:firebase-analytics-ktx")
-    implementation("com.google.firebase:firebase-storage-ktx")
-    implementation("com.google.firebase:firebase-core:21.1.1")
+
+    // Firebase Authentication + Firestore（必要なものだけ）
     implementation("com.google.firebase:firebase-auth-ktx")
     implementation("com.google.android.gms:play-services-auth:20.7.0")
     implementation ("com.google.firebase:firebase-database-ktx:21.0.0")
     implementation("com.google.android.gms:play-services-auth:21.3.0")
     implementation("com.google.firebase:firebase-firestore-ktx")
+
+    // Analytics（使っている場合のみ）
+    implementation("com.google.firebase:firebase-analytics-ktx")
+
+    implementation("androidx.compose.material:material-icons-extended:1.6.0") // バージョンはComposeに合わせて
 
     //Google Map API
     implementation("com.google.maps.android:maps-compose:6.1.0")
