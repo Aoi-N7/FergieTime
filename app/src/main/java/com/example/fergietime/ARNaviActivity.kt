@@ -1,5 +1,5 @@
 package com.example.fergietime
-
+// 必要なAndroid標準ライブラリ、Jetpack Compose、CameraX、Google位置情報、コルーチン、数学関数をインポート
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
@@ -54,63 +54,66 @@ import com.google.android.gms.location.LocationServices
 import kotlinx.coroutines.delay
 import kotlin.math.*
 
+// ARナビゲーションを実装するActivity
 class ArNavigationActivity : ComponentActivity(), SensorEventListener {
 
-    // インテントから受け取るデータ
-    private var shelterName: String = ""
-    private var shelterLat: Double = 0.0
-    private var shelterLng: Double = 0.0
-    private var userLat: Double = 0.0
-    private var userLng: Double = 0.0
-    private var shelterCapacity: Int = 0
-    private var shelterFacilities: String = ""
-    private var shelterPhone: String = ""
-    private var shelterAddress: String = ""
+    private var shelterName: String = ""       // 避難所名
+    private var shelterLat: Double = 0.0       // 避難所の緯度
+    private var shelterLng: Double = 0.0       // 避難所の経度
+    private var userLat: Double = 0.0          // ユーザーの緯度
+    private var userLng: Double = 0.0          // ユーザーの経度
+    private var shelterCapacity: Int = 0       // 避難所の収容人数
+    private var shelterFacilities: String = "" // 設備情報（文字列）
+    private var shelterPhone: String = ""      // 電話番号
+    private var shelterAddress: String = ""    // 住所
 
-    // センサー関連
-    private lateinit var sensorManager: SensorManager
-    private var accelerometer: Sensor? = null
-    private var magnetometer: Sensor? = null
-    private var gyroscope: Sensor? = null
+    // センサー関連のメンバー変数
+    private lateinit var sensorManager: SensorManager // センサー管理クラス
+    private var accelerometer: Sensor? = null         // 加速度センサー
+    private var magnetometer: Sensor? = null          // 地磁気センサー
+    private var gyroscope: Sensor? = null             // ジャイロセンサー
 
-    private val accelerometerReading = FloatArray(3)
-    private val magnetometerReading = FloatArray(3)
-    private val rotationMatrix = FloatArray(9)
-    private val orientationAngles = FloatArray(3)
+    // センサー計測値を格納する配列
+    private val accelerometerReading = FloatArray(3)  // 加速度の値 (x, y, z)
+    private val magnetometerReading = FloatArray(3)   // 地磁気の値 (x, y, z)
+    private val rotationMatrix = FloatArray(9)        // 回転行列（デバイスの向きを表す）
+    private val orientationAngles = FloatArray(3)     // 姿勢角度（方位、傾きなど）
 
-    // AR状態
-    private var currentAzimuth by mutableStateOf(0.0)
-    private var targetBearing by mutableStateOf(0.0)
-    private var currentDistance by mutableStateOf(0.0)
-    private var currentLocation: Location? = null
+
+    // ARナビゲーション用の状態
+    private var currentAzimuth by mutableStateOf(0.0) // 現在の方位（0°〜360°）
+    private var targetBearing by mutableStateOf(0.0)  // 避難所までの方位角
+    private var currentDistance by mutableStateOf(0.0)// 避難所までの距離（メートル）
+    private var currentLocation: Location? = null     // 現在地（nullの可能性あり）
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // インテントからデータを取得
-        shelterName = intent.getStringExtra("shelter_name") ?: ""
-        shelterLat = intent.getDoubleExtra("shelter_lat", 0.0)
-        shelterLng = intent.getDoubleExtra("shelter_lng", 0.0)
-        userLat = intent.getDoubleExtra("user_lat", 0.0)
-        userLng = intent.getDoubleExtra("user_lng", 0.0)
-        shelterCapacity = intent.getIntExtra("shelter_capacity", 0)
-        shelterFacilities = intent.getStringExtra("shelter_facilities") ?: ""
-        shelterPhone = intent.getStringExtra("shelter_phone") ?: ""
-        shelterAddress = intent.getStringExtra("shelter_address") ?: ""
+        // --- インテントから避難所情報を取得 ---
+        shelterName = intent.getStringExtra("shelter_name") ?: ""       // 避難所名
+        shelterLat = intent.getDoubleExtra("shelter_lat", 0.0)          // 避難所の緯度
+        shelterLng = intent.getDoubleExtra("shelter_lng", 0.0)          // 避難所の経度
+        userLat = intent.getDoubleExtra("user_lat", 0.0)                // ユーザーの緯度
+        userLng = intent.getDoubleExtra("user_lng", 0.0)                // ユーザーの経度
+        shelterCapacity = intent.getIntExtra("shelter_capacity", 0)     // 収容人数
+        shelterFacilities = intent.getStringExtra("shelter_facilities") ?: "" // 設備
+        shelterPhone = intent.getStringExtra("shelter_phone") ?: ""     // 電話番号
+        shelterAddress = intent.getStringExtra("shelter_address") ?: "" // 住所
 
-        // センサーマネージャーの初期化
+        // --- センサーマネージャーの初期化 ---
         sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
-        accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
-        magnetometer = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD)
-        gyroscope = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE)
+        accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)   // 加速度センサー
+        magnetometer = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD)   // 地磁気センサー
+        gyroscope = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE)           // ジャイロセンサー
 
-        // 初期計算
-        targetBearing = calculateBearing(userLat, userLng, shelterLat, shelterLng)
-        currentDistance = calculateDistance(userLat, userLng, shelterLat, shelterLng)
+        // --- 初期計算（避難所の方角と距離を算出） ---
+        targetBearing = calculateBearing(userLat, userLng, shelterLat, shelterLng)  // 避難所までの方位角
+        currentDistance = calculateDistance(userLat, userLng, shelterLat, shelterLng) // 避難所までの距離
 
+        // --- UIをComposeでセット ---
         setContent {
             MaterialTheme {
-                ArNavigationScreen()
+                ArNavigationScreen() // ARナビゲーション画面を表示
             }
         }
     }
@@ -131,39 +134,47 @@ class ArNavigationActivity : ComponentActivity(), SensorEventListener {
 
     override fun onPause() {
         super.onPause()
+        // アプリが停止中はセンサーのリスナーを解除してバッテリー節約
         sensorManager.unregisterListener(this)
     }
 
     override fun onSensorChanged(event: SensorEvent) {
+        // 受信したセンサーデータを処理
         when (event.sensor.type) {
             Sensor.TYPE_ACCELEROMETER -> {
+                // 加速度センサーの値をコピー
                 System.arraycopy(event.values, 0, accelerometerReading, 0, accelerometerReading.size)
             }
             Sensor.TYPE_MAGNETIC_FIELD -> {
+                // 地磁気センサーの値をコピー
                 System.arraycopy(event.values, 0, magnetometerReading, 0, magnetometerReading.size)
             }
         }
 
-        // 方位角を計算
+        // センサーデータから方位角を計算
         updateOrientationAngles()
     }
 
     override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {
-        // 精度変更時の処理（必要に応じて実装）
+        // センサー精度が変わったときの処理（未使用））
     }
 
     private fun updateOrientationAngles() {
+        // 加速度と地磁気データから回転行列を作成
         SensorManager.getRotationMatrix(
             rotationMatrix,
             null,
             accelerometerReading,
             magnetometerReading
         )
+        // 回転行列からデバイスの姿勢角度を算出
         SensorManager.getOrientation(rotationMatrix, orientationAngles)
 
         // 方位角を度に変換（0-360度）
         val azimuthInRadians = orientationAngles[0]
         val azimuthInDegrees = Math.toDegrees(azimuthInRadians.toDouble())
+
+        // -180〜180 の範囲を 0〜360 に変換して保持
         currentAzimuth = if (azimuthInDegrees < 0) {
             azimuthInDegrees + 360.0
         } else {
@@ -175,6 +186,7 @@ class ArNavigationActivity : ComponentActivity(), SensorEventListener {
     @Composable
     fun ArNavigationScreen() {
         val context = LocalContext.current
+        // カメラ権限があるかどうかを状態として保持
         var hasCameraPermission by remember {
             mutableStateOf(
                 ContextCompat.checkSelfPermission(
@@ -186,23 +198,26 @@ class ArNavigationActivity : ComponentActivity(), SensorEventListener {
         var cameraError by remember { mutableStateOf<String?>(null) }
         var showShelterDetails by remember { mutableStateOf(false) }
 
-        // 位置情報の更新
+        // --- 位置情報の更新をループで実行 ---
         LaunchedEffect(Unit) {
             while (true) {
-                updateLocation()
-                delay(2000) // 2秒ごとに位置情報を更新
+                updateLocation()   // 現在地を更新
+                delay(2000)        // 2秒ごとに実行
             }
         }
 
+        // --- カメラ権限リクエスト ---
         val cameraPermissionLauncher = rememberLauncherForActivityResult(
             contract = ActivityResultContracts.RequestPermission()
         ) { isGranted ->
             hasCameraPermission = isGranted
             if (!isGranted) {
+                // 権限がない場合はトースト表示
                 Toast.makeText(context, "カメラの権限が必要です", Toast.LENGTH_LONG).show()
             }
         }
 
+        // アプリ起動時にカメラ権限を確認して、なければリクエスト
         LaunchedEffect(Unit) {
             if (!hasCameraPermission) {
                 cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
@@ -216,6 +231,7 @@ class ArNavigationActivity : ComponentActivity(), SensorEventListener {
                 CameraPreview(
                     modifier = Modifier.fillMaxSize(),
                     onError = { error ->
+                        // カメラエラーが発生したら状態に反映
                         cameraError = error
                         Log.e("ArNavigationActivity", "Camera error: $error")
                     }
@@ -224,10 +240,10 @@ class ArNavigationActivity : ComponentActivity(), SensorEventListener {
                 // ARオーバーレイ
                 ArOverlay(
                     modifier = Modifier.fillMaxSize(),
-                    currentAzimuth = currentAzimuth,
-                    targetBearing = targetBearing.toFloat(),
-                    distance = currentDistance,
-                    shelterName = shelterName
+                    currentAzimuth = currentAzimuth,     // 現在の方位角
+                    targetBearing = targetBearing.toFloat(), // 目的地の方位角
+                    distance = currentDistance,          // 距離
+                    shelterName = shelterName            // 避難所名
                 )
 
                 // 🎯 プレミアムUI オーバーレイ
@@ -254,7 +270,7 @@ class ArNavigationActivity : ComponentActivity(), SensorEventListener {
                 onInfoClick = { showShelterDetails = !showShelterDetails }
             )
 
-            // ボトムパネル
+            // 画面下部のパネル（方位や距離を補助表示）
             PremiumBottomPanel(
                 distance = currentDistance,
                 currentAzimuth = currentAzimuth,
@@ -272,6 +288,7 @@ class ArNavigationActivity : ComponentActivity(), SensorEventListener {
         }
     }
 
+    // --- トップバーUI ---
     @Composable
     fun PremiumTopBar(
         shelterName: String,
@@ -281,7 +298,7 @@ class ArNavigationActivity : ComponentActivity(), SensorEventListener {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .statusBarsPadding()
+                .statusBarsPadding()// ステータスバー領域を避ける
         ) {
             // グラデーション背景
             Box(
@@ -298,6 +315,7 @@ class ArNavigationActivity : ComponentActivity(), SensorEventListener {
                     )
             )
 
+            // トップバー本体（戻るボタン・タイトル・情報ボタン・ステータス
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -325,6 +343,7 @@ class ArNavigationActivity : ComponentActivity(), SensorEventListener {
 
                 Spacer(modifier = Modifier.width(16.dp))
 
+                // タイトル部分（アプリ名＋避難所名）
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = "🧭 AR ナビゲーション",
@@ -371,7 +390,7 @@ class ArNavigationActivity : ComponentActivity(), SensorEventListener {
             }
         }
     }
-
+    // --- 避難所詳細パネル ---
     @Composable
     fun ShelterDetailsPanel(
         modifier: Modifier = Modifier,
@@ -389,7 +408,7 @@ class ArNavigationActivity : ComponentActivity(), SensorEventListener {
             Column(
                 modifier = Modifier.padding(20.dp)
             ) {
-                // ヘッダー
+                // パネルのヘッダー部分
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -462,6 +481,7 @@ class ArNavigationActivity : ComponentActivity(), SensorEventListener {
         }
     }
 
+    // --- 個別の情報表示用UI部品 ---
     @Composable
     fun DetailItem(
         icon: androidx.compose.ui.graphics.vector.ImageVector,
@@ -484,6 +504,7 @@ class ArNavigationActivity : ComponentActivity(), SensorEventListener {
 
             Spacer(modifier = Modifier.width(12.dp))
 
+            // ラベルと値を縦に表示
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = label,
@@ -500,6 +521,7 @@ class ArNavigationActivity : ComponentActivity(), SensorEventListener {
         }
     }
 
+    // --- プレミアム版オーバーレイ（距離や目標を強調表示） ---
     @Composable
     fun PremiumArOverlay(
         modifier: Modifier = Modifier,
@@ -508,10 +530,11 @@ class ArNavigationActivity : ComponentActivity(), SensorEventListener {
         targetBearing: Float,
         currentAzimuth: Double
     ) {
+        // 現在の方角と目的地方位の差を計算
         val angleDifference = normalizeAngle(targetBearing - currentAzimuth.toFloat())
         val isOnTarget = abs(angleDifference) < 15f
 
-        // アニメーション
+        // パルスアニメーション（目標方向に向いたとき拡大縮小）
         val pulseAnimation = rememberInfiniteTransition(label = "pulse")
         val pulseScale by pulseAnimation.animateFloat(
             initialValue = 1f,
@@ -523,6 +546,7 @@ class ArNavigationActivity : ComponentActivity(), SensorEventListener {
             label = "pulseScale"
         )
 
+        // アイコンの回転アニメーション
         val rotationAnimation = rememberInfiniteTransition(label = "rotation")
         val rotation by rotationAnimation.animateFloat(
             initialValue = 0f,
@@ -547,6 +571,7 @@ class ArNavigationActivity : ComponentActivity(), SensorEventListener {
             ) {
                 Box(
                     modifier = Modifier
+                        // 背景に放射状の黒グラデーション
                         .background(
                             Brush.radialGradient(
                                 colors = listOf(
@@ -557,6 +582,7 @@ class ArNavigationActivity : ComponentActivity(), SensorEventListener {
                             ),
                             RoundedCornerShape(24.dp)
                         )
+                        // 外枠にシアン～ブルーのグラデーション枠線
                         .border(
                             2.dp,
                             Brush.horizontalGradient(
@@ -628,15 +654,17 @@ class ArNavigationActivity : ComponentActivity(), SensorEventListener {
     @Composable
     fun DirectionIndicator(
         modifier: Modifier = Modifier,
-        angleDifference: Float,
-        isOnTarget: Boolean
+        angleDifference: Float, // 目標方位との角度差
+        isOnTarget: Boolean     // 方向が合っているかどうか
     ) {
+        // 矢印の回転アニメーション
         val arrowRotation by animateFloatAsState(
             targetValue = angleDifference,
             animationSpec = tween(300),
             label = "arrowRotation"
         )
 
+        // 中央に丸いコンパス風カードを表示
         Card(
             modifier = modifier
                 .size(120.dp)
@@ -649,6 +677,7 @@ class ArNavigationActivity : ComponentActivity(), SensorEventListener {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
+                    // 方位に応じて背景の色を変える（緑=正しい方向, 赤=ズレあり）
                     .background(
                         Brush.radialGradient(
                             colors = if (isOnTarget) {
@@ -705,7 +734,7 @@ class ArNavigationActivity : ComponentActivity(), SensorEventListener {
             }
         }
     }
-
+    // ================== サイド情報パネル ==================
     @Composable
     fun SideInfoPanels(
         modifier: Modifier = Modifier,
@@ -720,6 +749,7 @@ class ArNavigationActivity : ComponentActivity(), SensorEventListener {
                     .padding(16.dp)
                     .width(80.dp),
                 colors = CardDefaults.cardColors(
+                    // 距離に応じて色を変化（高:赤 / 中:オレンジ / 低:緑）
                     containerColor = Color.Blue.copy(alpha = 0.9f)
                 ),
                 shape = RoundedCornerShape(16.dp)
@@ -737,6 +767,7 @@ class ArNavigationActivity : ComponentActivity(), SensorEventListener {
 
                     Spacer(modifier = Modifier.height(4.dp))
 
+                    // 歩行時間を表示（距離から計算）
                     Text(
                         text = "${getWalkingTime(distance)}分",
                         color = Color.White,
@@ -800,7 +831,7 @@ class ArNavigationActivity : ComponentActivity(), SensorEventListener {
             }
         }
     }
-
+    // ================== 下部プレミアムパネル ==================
     @Composable
     fun PremiumBottomPanel(
         distance: Double,
@@ -908,7 +939,7 @@ class ArNavigationActivity : ComponentActivity(), SensorEventListener {
             }
         }
     }
-
+    // ================== 共通情報アイテム ==================
     @Composable
     fun InfoItem(
         icon: androidx.compose.ui.graphics.vector.ImageVector,
