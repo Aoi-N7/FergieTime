@@ -9,6 +9,7 @@
 /.idea/workspace.xml
 /.idea/navEditor.xml
 /.idea/assetWizardSettings.xml
+shelved.patch
 .DS_Store
 /build
 /captures
@@ -21,3 +22,5 @@ gradle.properties
 
 # Firebase キー
 **/google-services.json
+/.idea/shelf/2025_08_31_21_04_の_マージ_前の未コミットの変更_[変更]/shelved.patch
+/.idea/shelf/2025_08_31_21_04_の_マージ_前の未コミットの変更_[変更]/shelved.patch

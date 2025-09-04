@@ -32,116 +32,56 @@ class MainActivity : ComponentActivity() {
         super.attachBaseContext(context)
     }
 
-
     // 位置情報取得用のクラス
-    private lateinit var locationSensor: LocationSensor
+    lateinit var locationSensor: LocationSensor
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        // Firebase の初期化処理
-        FirebaseApp.initializeApp(this)
-
-        // ステータスバーやナビゲーションバーの背景をアプリの内容で描画できるようにする
-        enableEdgeToEdge()
-
-        // 通知チャンネルを作成する
-        Notice.createChannel(this)
-
-        // Android 13 以降では通知の許可を明示的に求める必要がある
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (ContextCompat.checkSelfPermission(
-                    this,
-                    android.Manifest.permission.POST_NOTIFICATIONS
-                ) != PackageManager.PERMISSION_GRANTED
-            ) {
-                requestPermissions(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), 1001)
-            }
-        }
-
-        // 位置情報の権限確認と現在位置の取得を行う
-        locationSensor = LocationSensor(this)
-        locationSensor.requestPermission()
-        locationSensor.requestCurrentLocation()
-
-        // Jetpack Compose による画面表示の開始
+        initializeAppLogic(this)
         setContent {
             FergieTimeTheme {
-                // 現在表示する画面を保持する状態変数
                 var currentScreen by remember { mutableStateOf<Screen>(Screen.Loading) }
 
-                // 自動ログインをチェックする処理
                 LaunchedEffect(Unit) {
                     val user = FirebaseAuth.getInstance().currentUser
                     if (user != null) {
-                        // ログイン中のユーザーがいれば Firestore からユーザー名を取得
                         FirebaseFirestore.getInstance()
                             .collection("userdata")
                             .document(user.uid)
                             .get()
                             .addOnSuccessListener { document ->
                                 val name = document.getString("name")
-                                if (name != null) {
-                                    currentScreen = Screen.Home(name)
-                                } else {
-                                    currentScreen = Screen.Login
-                                }
+                                currentScreen = if (name != null) Screen.Home(name) else Screen.Login
                             }
                             .addOnFailureListener {
                                 currentScreen = Screen.Login
                             }
                     } else {
-                        // 未ログインならログイン画面に遷移
                         currentScreen = Screen.Login
                     }
                 }
 
-                // 現在の画面の状態に応じて適切な Composable を表示する
                 when (currentScreen) {
-                    is Screen.Loading -> {
-                        // ローディング中はインジケーターを中央に表示する
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            CircularProgressIndicator()
-                        }
-                    }
+                    is Screen.Loading -> Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) { CircularProgressIndicator() }
 
-                    is Screen.Location -> LocationScreen(
-                        locationSensor = locationSensor,
-                        onNavigateTo = { currentScreen = it }
-                    )
-
-                    is Screen.Notification -> NotificationScreen(
-                        context = this,
-                        onBack = { currentScreen = Screen.Location }
-                    )
-
-                    is Screen.Cache -> CacheScreen(
-                        onBack = { currentScreen = Screen.Location }
-                    )
-
+                    is Screen.Location -> LocationScreen(locationSensor) { currentScreen = it }
+                    is Screen.Notification -> NotificationScreen(this) { currentScreen = Screen.Location }
+                    is Screen.Cache -> CacheScreen { currentScreen = Screen.Location }
                     is Screen.Login -> LoginScreen(
                         onBack = { currentScreen = Screen.Location },
                         onNavigateToRegister = { currentScreen = Screen.Register },
                         onNavigateToReset = { currentScreen = Screen.PasswordReset },
                         onLoginSuccess = { name -> currentScreen = Screen.Home(name) }
                     )
-
-                    is Screen.Register -> RegisterScreen(
-                        onBack = { currentScreen = Screen.Login }
-                    )
-
-                    is Screen.PasswordReset -> PasswordResetScreen(
-                        onBack = { currentScreen = Screen.Login }
-                    )
-
+                    is Screen.Register -> RegisterScreen { currentScreen = Screen.Login }
+                    is Screen.PasswordReset -> PasswordResetScreen { currentScreen = Screen.Login }
                     is Screen.Home -> HomeScreen(
                         userName = (currentScreen as Screen.Home).userName,
                         onBack = { currentScreen = Screen.Login },
                         onLogout = {
-                            // サインアウト後にログイン画面へ遷移
                             FirebaseAuth.getInstance().signOut()
                             currentScreen = Screen.Login
                         }
@@ -168,7 +108,6 @@ fun GreetingScreen(
         Button(onClick = { onChangeToJapanese() }) {
             Text(text = stringResource(id = R.string.change_language_japanese))
         }
-
     }
 }
 
