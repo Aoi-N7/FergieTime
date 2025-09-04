@@ -1,5 +1,6 @@
 package com.example.fergietime
 
+import android.graphics.Color
 import android.os.Bundle
 import android.os.Build
 import android.content.pm.PackageManager
@@ -24,6 +25,10 @@ import com.google.firebase.firestore.FirebaseFirestore
 import androidx.compose.material3.*
 import androidx.compose.ui.Alignment
 import androidx.compose.foundation.layout.*
+import android.widget.Button
+import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
+import androidx.constraintlayout.widget.ConstraintLayout
 
 class MainActivity : ComponentActivity() {
 
@@ -34,6 +39,8 @@ class MainActivity : ComponentActivity() {
 
     // 位置情報取得用のクラス
     lateinit var locationSensor: LocationSensor
+
+    private var isDarkTheme = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -91,6 +98,40 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
+
+/*
+class MainActivity : AppCompatActivity() {
+
+    private var isDarkTheme = false
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+
+        val layout = findViewById<ConstraintLayout>(R.id.rootLayout)
+        val textView = findViewById<TextView>(R.id.textView)
+        val button = findViewById<Button>(R.id.buttonSwitchTheme)
+
+        button.setOnClickListener {
+            isDarkTheme = !isDarkTheme
+
+            if (isDarkTheme) {
+                textView.text = "ダークテーマが有効"
+                layout.setBackgroundColor(Color.BLACK)
+                textView.setTextColor(Color.WHITE)
+                button.setBackgroundColor(Color.DKGRAY)
+                button.setTextColor(Color.WHITE)
+            } else {
+                textView.text = "ライトテーマが有効"
+                layout.setBackgroundColor(Color.WHITE)
+                textView.setTextColor(Color.BLACK)
+                button.setBackgroundColor(Color.LTGRAY)
+                button.setTextColor(Color.BLACK)
+            }
+        }
+    }
+}
+*/
 
 @Composable
 fun GreetingScreen(
