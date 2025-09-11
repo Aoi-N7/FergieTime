@@ -31,10 +31,10 @@
         android:theme="@style/Theme.AppCompat.DayNight.NoActionBar"
         tools:targetApi="31">
 
-        <!-- Google Maps API キー -->
+        <!-- Google Map APIのアクセストークンを指定するためのメタデータ -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyDLG4UBlqCpFdIMeKJ2jAds_8JqrrD1LG8" />
+            android:value="${MAPS_API_KEY}" />
 
         <!-- ARCore を使うアプリであることを宣言 -->
         <meta-data

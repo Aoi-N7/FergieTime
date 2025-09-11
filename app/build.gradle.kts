@@ -1,8 +1,15 @@
+import java.util.Properties     // local.propertiesファイルからプロパティを読み込む
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
 }
 
+
+// local.properties ファイルからプロパティを読み込む
+val localProperties = Properties()
+localProperties.load(rootProject.file("local.properties").inputStream())
+val mapsApiKey = localProperties.getProperty("MAPS_API_KEY") ?: ""
 
 android {
     namespace = "com.example.fergietime"
@@ -19,6 +26,14 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+
+
+        // manifestPlaceholders に API キーを渡す
+        manifestPlaceholders["MAPS_API_KEY"] = mapsApiKey
+
+        // BuildConfig に API キーを渡す
+        buildConfigField("String", "MAPS_API_KEY", "\"$mapsApiKey\"")
+
     }
 
     buildTypes {
@@ -41,6 +56,7 @@ android {
     }
 
     buildFeatures {
+        buildConfig = true
         compose = true
         viewBinding = true
         dataBinding = false
