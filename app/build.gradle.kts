@@ -119,4 +119,7 @@ dependencies {
     // Debug
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
+
+    // 追加：ComposeでViewModelを使うため
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
 }

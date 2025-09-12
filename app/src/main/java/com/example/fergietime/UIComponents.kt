@@ -35,17 +35,16 @@ import com.google.android.gms.maps.model.LatLng
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
-fun EvacuationNavApp(
-    shelters: List<EvacuationShelter>
-) {
-    val context = LocalContext.current
+fun EvacuationNavApp(viewModel: ShelterViewModel = viewModel()) {
+    val shelters by viewModel.shelters.collectAsState()
 
+    val context = LocalContext.current
 
     // MapView を Compose 内で保持
     var mapView = remember { MapView(context, GoogleMapOptions()) }
-
 
     var googleMapRef: GoogleMap? by remember { mutableStateOf<GoogleMap?>(null) }
     var selectedShelter: EvacuationShelter? by remember { mutableStateOf<EvacuationShelter?>(null) }
