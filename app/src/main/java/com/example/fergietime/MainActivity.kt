@@ -14,11 +14,26 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.example.disasterapp.DisasterApp
 import com.example.fergietime.ui.theme.FergieTimeTheme
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
 class MainActivity : ComponentActivity() {
+
+//    override fun onCreate(savedInstanceState: Bundle?) {
+//        super.onCreate(savedInstanceState)
+//        setContent {
+//            FergieTimeTheme {
+//                Surface(
+//                    modifier = Modifier.fillMaxSize(),
+//                    color = MaterialTheme.colorScheme.background
+//                ) {
+//                    DisasterApp()
+//                }
+//            }
+//        }
+//    }
 
     override fun attachBaseContext(newBase: Context) {
         val context = LocaleHelper.setLocale(newBase, LocaleHelper.getLanguage(newBase))
@@ -32,6 +47,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         initializeAppLogic(this)
         setContent {
+
             var isDarkTheme by remember { mutableStateOf(false) }
             FergieTimeTheme(darkTheme = isDarkTheme) {
                 var currentScreen by remember { mutableStateOf<Screen>(Screen.Loading) }
@@ -94,6 +110,13 @@ class MainActivity : ComponentActivity() {
                         )
                     }
                 }
+            }
+
+            Surface(
+                modifier = Modifier.fillMaxSize(),
+                color = MaterialTheme.colorScheme.background
+            ) {
+                DisasterApp()
             }
         }
     }
