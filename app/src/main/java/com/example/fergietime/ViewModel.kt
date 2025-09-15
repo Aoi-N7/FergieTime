@@ -6,8 +6,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import java.text.SimpleDateFormat
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.util.Date
+import java.util.Locale
+import android.util.Log
+import java.util.*
 
 class SafetyStatusViewModel : ViewModel() {
     var statusText by mutableStateOf("")
@@ -30,13 +35,21 @@ class SafetyStatusViewModel : ViewModel() {
         selectedStatus = status
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     fun registerStatus() {
-        if (statusText.isNotBlank()) {
+        if (statusText.isNotBlank() && selectedStatus != null) {
             isRegistered = true
-            val now = LocalDateTime.now()
-            val formatter = DateTimeFormatter.ofPattern("HH:mm")
-            registeredTime = now.format(formatter)
+
+            val now = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date())
+            registeredTime = now
+
+            // ✅ ログ出力
+            Log.d("SafetyStatusViewModel", "登録完了")
+            Log.d("SafetyStatusViewModel", "状態: $selectedStatus")
+            Log.d("SafetyStatusViewModel", "メッセージ: $statusText")
+            Log.d("SafetyStatusViewModel", "時刻: $registeredTime")
+        } else {
+            Log.d("SafetyStatusViewModel", "登録失敗：状態またはメッセージが未入力")
         }
     }
 }
+

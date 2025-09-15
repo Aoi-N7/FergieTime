@@ -1,4 +1,4 @@
-package com.example.disasterapp
+package com.example.fergietime
 
 import android.app.Activity
 import androidx.compose.foundation.layout.*
@@ -6,18 +6,20 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.disasterapp.screens.*
 import com.example.disasterapp.components.BottomNavigationBar
-import com.example.fergietime.MapScreen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DisasterApp() {
     val navController = rememberNavController()
     var currentRoute by remember { mutableStateOf("home") }
+
+    val viewModel: SafetyStatusViewModel = viewModel()
 
     Scaffold(
         bottomBar = {
@@ -42,7 +44,8 @@ fun DisasterApp() {
                 HomeScreen(
                     onNavigateToEvacuation = {
                         navController.navigate("evacuation")
-                    }
+                    },
+                    viewModel = viewModel
                 )
             }
             composable("map") {
@@ -66,7 +69,8 @@ fun DisasterApp() {
                 SafetyScreen(
                     onPersonClick = { personId ->
                         navController.navigate("person_detail/$personId")
-                    }
+                    },
+                    viewModel = viewModel
                 )
             }
             composable("settings") {

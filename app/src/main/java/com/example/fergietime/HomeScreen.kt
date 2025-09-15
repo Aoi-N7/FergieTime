@@ -1,4 +1,4 @@
-package com.example.disasterapp.screens
+package com.example.fergietime
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -8,17 +8,15 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.disasterapp.components.*
-import com.example.fergietime.SafetyStatusViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
 fun HomeScreen(
-    onNavigateToEvacuation: () -> Unit
+    onNavigateToEvacuation: () -> Unit,
+    viewModel: SafetyStatusViewModel
 ) {
     LazyColumn(
         modifier = Modifier
@@ -58,13 +56,13 @@ fun HomeScreen(
         }
         
         item {
-            SafetyStatusCard()
+            SafetyStatusCard(viewModel)
         }
     }
 }
 
 @Composable
-fun SafetyStatusCard(viewModel: SafetyStatusViewModel = viewModel()) {
+fun SafetyStatusCard(viewModel: SafetyStatusViewModel) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)

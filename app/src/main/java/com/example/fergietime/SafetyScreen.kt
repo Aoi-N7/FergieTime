@@ -1,4 +1,4 @@
-package com.example.disasterapp.screens
+package com.example.fergietime
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -14,9 +14,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.disasterapp.components.PersonCard
 
+
 @Composable
 fun SafetyScreen(
-    onPersonClick: (String) -> Unit
+    onPersonClick: (String) -> Unit,
+    viewModel: SafetyStatusViewModel
 ) {
     LazyColumn(
         modifier = Modifier
@@ -25,7 +27,7 @@ fun SafetyScreen(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         item {
-            MySafetyStatusSection()
+            MySafetyStatusSection(viewModel)
         }
         
         item {
@@ -39,18 +41,26 @@ fun SafetyScreen(
 }
 
 @Composable
-fun MySafetyStatusSection() {
+fun MySafetyStatusSection(viewModel: SafetyStatusViewModel) {
+    val message = if (viewModel.isRegistered) viewModel.statusText else "未入力"
+    val time = viewModel.registeredTime ?: "未登録"
+
+    var inputText by remember { mutableStateOf("") }
+
     Column {
         Text(
             text = "自分の安否状況",
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold
         )
-        
+
         Spacer(modifier = Modifier.height(16.dp))
-        
+
         Button(
-            onClick = { },
+            onClick = {
+                viewModel.onStatusSelected("安全")
+                viewModel.registerStatus()
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(64.dp),
@@ -73,26 +83,26 @@ fun MySafetyStatusSection() {
                     )
                 }
             }
-            
+
             Spacer(modifier = Modifier.width(8.dp))
-            
+
             Text(
                 text = "安全",
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Medium
             )
         }
-        
+
         Spacer(modifier = Modifier.height(8.dp))
-        
+
         Text(
-            text = "12時30分：○○学校で待機中",
+            text = "$message（$time）",
             fontSize = 14.sp,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
-        
+
         Spacer(modifier = Modifier.height(16.dp))
-        
+
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(containerColor = Color(0xFFF5F5F5))
@@ -102,19 +112,23 @@ fun MySafetyStatusSection() {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 OutlinedTextField(
-                    value = "",
-                    onValueChange = { },
-                    placeholder = { Text("状況を入力あああああ...") },
+                    value = inputText,
+                    onValueChange = { inputText = it },
+                    placeholder = { Text("状況を入力...") },
                     modifier = Modifier.weight(1f),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = Color.Transparent,
                         unfocusedBorderColor = Color.Transparent
                     )
                 )
-                
+
                 Spacer(modifier = Modifier.width(8.dp))
-                
-                IconButton(onClick = { }) {
+
+                IconButton(onClick = {
+                    viewModel.onStatusTextChange(inputText)
+                    viewModel.registerStatus()
+                    inputText = ""
+                }) {
                     Card(
                         modifier = Modifier.size(32.dp),
                         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primary),
