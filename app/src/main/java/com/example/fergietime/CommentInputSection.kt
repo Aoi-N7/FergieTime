@@ -11,10 +11,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.ViewModel
+import com.example.fergietime.SafetyStatusViewModel
 
 @Composable
-fun CommentInputSection() {
-    var statusText by remember { mutableStateOf("") }
+fun CommentInputSection(viewModel: SafetyStatusViewModel) {
+    val statusText = viewModel.statusText
+    val isRegistered = viewModel.isRegistered
 
     // テキストカード
     Card(
@@ -46,7 +49,7 @@ fun CommentInputSection() {
             Column(modifier = Modifier.weight(1f)) {
                 OutlinedTextField(
                     value = statusText,
-                    onValueChange = { statusText = it },
+                    onValueChange = { viewModel.onStatusTextChange(it) },
                     placeholder = { Text("現在の状況を入力...") },
                     modifier = Modifier.fillMaxWidth(),
                     colors = OutlinedTextFieldDefaults.colors(
@@ -64,8 +67,11 @@ fun CommentInputSection() {
         }
     }
 
+    Spacer(modifier = Modifier.width(8.dp))
+
+    // 登録時間
     Button(
-        onClick = { /* 登録処理 */ },
+        onClick = { viewModel.registerStatus() },
         modifier = Modifier.fillMaxWidth(),
         colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
     ) {

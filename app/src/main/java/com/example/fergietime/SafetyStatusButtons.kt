@@ -11,10 +11,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.fergietime.SafetyStatusViewModel
 
 @Composable
-fun SafetyStatusButtons() {
-    var selectedStatus by remember { mutableStateOf<String?>(null) }
+fun SafetyStatusButtons(viewModel: SafetyStatusViewModel) {
+    val selectedStatus = viewModel.selectedStatus
     val statuses = listOf(
         Triple("安全", Color(0xFF4CAF50), Icons.Default.Person),
         Triple("避難中", Color(0xFFFF9800), Icons.Default.Person),
@@ -32,7 +33,7 @@ fun SafetyStatusButtons() {
 
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 IconButton(
-                    onClick = { selectedStatus = text },
+                    onClick = { viewModel.onStatusSelected(text) },
                     modifier = Modifier.size(64.dp)
                 ) {
                     Card(

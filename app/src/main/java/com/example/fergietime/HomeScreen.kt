@@ -13,6 +13,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.disasterapp.components.*
+import com.example.fergietime.SafetyStatusViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
 fun HomeScreen(
@@ -62,7 +64,7 @@ fun HomeScreen(
 }
 
 @Composable
-fun SafetyStatusCard() {
+fun SafetyStatusCard(viewModel: SafetyStatusViewModel = viewModel()) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
@@ -78,7 +80,7 @@ fun SafetyStatusCard() {
             
             Spacer(modifier = Modifier.height(16.dp))
             
-            SafetyStatusButtons()
+            SafetyStatusButtons(viewModel)
             
             Spacer(modifier = Modifier.height(16.dp))
             
@@ -94,14 +96,14 @@ fun SafetyStatusCard() {
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = "自分の状況を共有しよう",
+                    text = if (viewModel.isRegistered) "登録済み" else "自分の状況を共有しよう",
                     fontWeight = FontWeight.Medium
                 )
             }
             
             Spacer(modifier = Modifier.height(16.dp))
             
-            CommentInputSection()
+            CommentInputSection(viewModel)
         }
     }
 }
