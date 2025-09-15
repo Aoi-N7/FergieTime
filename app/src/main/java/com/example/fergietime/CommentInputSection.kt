@@ -14,6 +14,9 @@ import androidx.compose.ui.unit.sp
 
 @Composable
 fun CommentInputSection() {
+    var statusText by remember { mutableStateOf("") }
+
+    // テキストカード
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = Color(0xFFF5F5F5))
@@ -37,13 +40,13 @@ fun CommentInputSection() {
                     )
                 }
             }
-            
+
             Spacer(modifier = Modifier.width(12.dp))
-            
+
             Column(modifier = Modifier.weight(1f)) {
                 OutlinedTextField(
-                    value = "",
-                    onValueChange = { },
+                    value = statusText,
+                    onValueChange = { statusText = it },
                     placeholder = { Text("現在の状況を入力...") },
                     modifier = Modifier.fillMaxWidth(),
                     colors = OutlinedTextFieldDefaults.colors(
@@ -51,42 +54,24 @@ fun CommentInputSection() {
                         unfocusedBorderColor = Color.Transparent
                     )
                 )
-                
+
                 Spacer(modifier = Modifier.height(8.dp))
-                
-                OutlinedTextField(
-                    value = "",
-                    onValueChange = { },
-                    placeholder = { Text("追加情報...") },
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = Color.Transparent,
-                        unfocusedBorderColor = Color.Transparent
-                    )
-                )
+
             }
-            
+
             Spacer(modifier = Modifier.width(8.dp))
-            
-            IconButton(onClick = { }) {
-                Card(
-                    modifier = Modifier.size(32.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primary),
-                    shape = MaterialTheme.shapes.extraLarge
-                ) {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.KeyboardArrowUp,
-                            contentDescription = null,
-                            tint = Color.White,
-                            modifier = Modifier.size(16.dp)
-                        )
-                    }
-                }
-            }
+
         }
     }
+
+    Button(
+        onClick = { /* 登録処理 */ },
+        modifier = Modifier.fillMaxWidth(),
+        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+    ) {
+        Text("登録", color = Color.White)
+    }
+
+    Spacer(modifier = Modifier.width(8.dp))
+
 }

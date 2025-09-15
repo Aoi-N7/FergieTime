@@ -117,12 +117,6 @@ class MainActivity : ComponentActivity() {
                 color = MaterialTheme.colorScheme.background
             ) {
                 DisasterApp()
-
-//                val context = LocalContext.current
-//                val activity = context as? Activity
-//                activity?.let {
-//                    MapScreen(activity = it)
-//                }
             }
 
         }

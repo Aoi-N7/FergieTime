@@ -1,14 +1,17 @@
 package com.example.disasterapp
 
+import android.app.Activity
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.disasterapp.screens.*
 import com.example.disasterapp.components.BottomNavigationBar
+import com.example.fergietime.MapScreen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -43,15 +46,22 @@ fun DisasterApp() {
                 )
             }
             composable("map") {
-                MapScreen(
-                    onPersonClick = { personId ->
-                        navController.navigate("person_detail/$personId")
-                    },
-                    onNavigateToEvacuation = {
-                        navController.navigate("evacuation")
-                    }
-                )
+                val context = LocalContext.current
+                val activity = context as? Activity
+
+                activity?.let {
+                    MapScreen(
+                        activity = it,
+                        onPersonClick = { personId ->
+                            navController.navigate("person_detail/$personId")
+                        },
+                        onNavigateToEvacuation = {
+                            navController.navigate("evacuation")
+                        }
+                    )
+                }
             }
+
             composable("safety") {
                 SafetyScreen(
                     onPersonClick = { personId ->

@@ -104,7 +104,7 @@ fun MySafetyStatusSection() {
                 OutlinedTextField(
                     value = "",
                     onValueChange = { },
-                    placeholder = { Text("状況を入力...") },
+                    placeholder = { Text("状況を入力あああああ...") },
                     modifier = Modifier.weight(1f),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = Color.Transparent,
