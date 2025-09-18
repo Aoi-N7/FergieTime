@@ -1,4 +1,4 @@
-package com.example.fergietime.auth
+package com.example.fergietime
 
 import android.util.Log
 import com.google.firebase.firestore.FirebaseFirestore

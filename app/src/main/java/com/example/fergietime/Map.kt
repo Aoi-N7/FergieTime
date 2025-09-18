@@ -1,3 +1,5 @@
+// MapScreen.ktに以降済のためコメントアウト
+
 //// マップの表示（後々、現在値の取得、周辺の避難所の取得など追加予定）
 //package com.example.fergietime
 //

@@ -1,8 +1,7 @@
+// ユーザーが現在の状況を入力し、安否情報として登録する入力セクション
 package com.example.fergietime
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -11,15 +10,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.ViewModel
-import com.example.fergietime.SafetyStatusViewModel
 
 @Composable
 fun CommentInputSection(viewModel: SafetyStatusViewModel) {
     val statusText = viewModel.statusText
-    val isRegistered = viewModel.isRegistered
 
-    // テキストカード
+    // 入力用のテキストカード
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = Color(0xFFF5F5F5))
@@ -28,6 +24,7 @@ fun CommentInputSection(viewModel: SafetyStatusViewModel) {
             modifier = Modifier.padding(12.dp),
             verticalAlignment = Alignment.Top
         ) {
+            // アイコンカード（「も」の文字を表示）
             Card(
                 modifier = Modifier.size(32.dp),
                 shape = MaterialTheme.shapes.extraLarge
@@ -46,6 +43,7 @@ fun CommentInputSection(viewModel: SafetyStatusViewModel) {
 
             Spacer(modifier = Modifier.width(12.dp))
 
+            // 状況の入力欄
             Column(modifier = Modifier.weight(1f)) {
                 OutlinedTextField(
                     value = statusText,
@@ -59,17 +57,15 @@ fun CommentInputSection(viewModel: SafetyStatusViewModel) {
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
-
             }
 
             Spacer(modifier = Modifier.width(8.dp))
-
         }
     }
 
     Spacer(modifier = Modifier.width(8.dp))
 
-    // 登録時間
+    // 登録ボタン（押すと安否情報を登録）
     Button(
         onClick = { viewModel.registerStatus() },
         modifier = Modifier.fillMaxWidth(),
@@ -79,5 +75,5 @@ fun CommentInputSection(viewModel: SafetyStatusViewModel) {
     }
 
     Spacer(modifier = Modifier.width(8.dp))
-
 }
+

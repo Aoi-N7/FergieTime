@@ -1,3 +1,4 @@
+// 避難所へのナビゲーション、天気警報、家族の位置、自分の安否状況を表示する
 package com.example.fergietime
 
 import androidx.compose.foundation.layout.*
@@ -11,13 +12,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.disasterapp.components.*
 
 @Composable
 fun HomeScreen(
     onNavigateToEvacuation: () -> Unit,
     viewModel: SafetyStatusViewModel
 ) {
+    // 縦スクロール可能なリスト
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -25,6 +26,7 @@ fun HomeScreen(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         item {
+            // 一番近い避難所までのARナビ(予定)
             Button(
                 onClick = onNavigateToEvacuation,
                 modifier = Modifier
@@ -46,16 +48,19 @@ fun HomeScreen(
                 )
             }
         }
-        
+
         item {
+            // 天気警報カード（例：台風・大雨など）
             WeatherAlertCard()
         }
-        
+
         item {
+            // 家族の位置情報カード
             FamilyLocationCard()
         }
-        
+
         item {
+            // 自分の安否状況カード
             SafetyStatusCard(viewModel)
         }
     }
@@ -63,6 +68,7 @@ fun HomeScreen(
 
 @Composable
 fun SafetyStatusCard(viewModel: SafetyStatusViewModel) {
+    // 安否状況を表示するカード
     Card(
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
@@ -70,18 +76,21 @@ fun SafetyStatusCard(viewModel: SafetyStatusViewModel) {
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
+            // タイトル
             Text(
                 text = "自分の安否状況",
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold
             )
-            
+
             Spacer(modifier = Modifier.height(16.dp))
-            
+
+            // 状態選択ボタン（安全・避難中・危険など）
             SafetyStatusButtons(viewModel)
-            
+
             Spacer(modifier = Modifier.height(16.dp))
-            
+
+            // 登録状況の表示（登録済みかどうか）
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Center,
@@ -98,10 +107,12 @@ fun SafetyStatusCard(viewModel: SafetyStatusViewModel) {
                     fontWeight = FontWeight.Medium
                 )
             }
-            
+
             Spacer(modifier = Modifier.height(16.dp))
-            
+
+            // コメント入力欄（自由記述）
             CommentInputSection(viewModel)
         }
     }
 }
+

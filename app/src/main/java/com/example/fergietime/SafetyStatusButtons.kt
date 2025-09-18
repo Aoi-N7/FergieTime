@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun SafetyStatusButtons(viewModel: SafetyStatusViewModel) {
     val selectedStatus = viewModel.selectedStatus
+
     val statuses = listOf(
         Triple("安全", Color(0xFF4CAF50), Icons.Default.Person),
         Triple("避難中", Color(0xFFFF9800), Icons.Default.Person),

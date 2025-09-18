@@ -1,4 +1,4 @@
-package com.example.disasterapp.components
+package com.example.fergietime
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons

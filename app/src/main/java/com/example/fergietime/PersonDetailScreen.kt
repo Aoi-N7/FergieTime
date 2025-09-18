@@ -1,4 +1,4 @@
-package com.example.disasterapp.screens
+package com.example.fergietime
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*

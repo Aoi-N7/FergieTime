@@ -1,4 +1,4 @@
-package com.example.disasterapp.components
+package com.example.fergietime
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*

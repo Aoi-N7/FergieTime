@@ -1,4 +1,4 @@
-package com.example.disasterapp.screens
+package com.example.fergietime
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -10,7 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.disasterapp.components.SettingItem
+import com.example.fergietime.SettingItem
 
 @Composable
 fun SettingsScreen(

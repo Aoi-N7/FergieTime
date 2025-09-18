@@ -1,4 +1,3 @@
-
 package com.example.fergietime
 
 import android.os.Bundle
@@ -12,7 +11,7 @@ import com.example.fergietime.ui.theme.FergieTimeTheme
 
 class MainActivity : ComponentActivity() {
 
-    // 🔧 これを追加
+    //
     lateinit var locationSensor: LocationSensor
 
     override fun attachBaseContext(newBase: Context) {
