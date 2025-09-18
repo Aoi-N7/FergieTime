@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">FergieTime</string>
+    <string name="app_name">Shinromaru</string>
     <string name="greeting">Hello, FergieTime!</string>
     <string name="change_language">Switch to English</string>
     <string name="change_language_japanese">Switch to Japanese</string>
