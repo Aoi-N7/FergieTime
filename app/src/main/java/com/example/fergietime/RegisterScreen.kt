@@ -20,29 +20,24 @@ import androidx.compose.material.icons.filled.VisibilityOff
 
 @Composable
 fun RegisterScreen(onBack: () -> Unit) {
-    // メールアドレス入力用の状態
     var email by remember { mutableStateOf("") }
-
-    // パスワード入力用の状態
     var password by remember { mutableStateOf("") }
-
-    // 名前入力用の状態
     var name by remember { mutableStateOf("") }
-
-    // エラーメッセージの表示状態
     var errorMessage by remember { mutableStateOf<String?>(null) }
-
-    // パスワードの表示切り替え状態
     var passwordVisible by remember { mutableStateOf(false) }
 
-    // 画面全体のレイアウト
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // 名前入力欄
+        Spacer(modifier = Modifier.height(125.dp))
+
+        Text("新規登録", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+
+        Spacer(modifier = Modifier.height(24.dp))
+
         OutlinedTextField(
             value = name,
             onValueChange = { name = it },
@@ -51,20 +46,18 @@ fun RegisterScreen(onBack: () -> Unit) {
             modifier = Modifier.fillMaxWidth()
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
-        // メールアドレス入力欄
         OutlinedTextField(
             value = email,
             onValueChange = { email = it },
+            modifier = Modifier.fillMaxWidth(),
             label = { Text("メールアドレス") },
             leadingIcon = { Icon(Icons.Default.Email, contentDescription = null) },
-            modifier = Modifier.fillMaxWidth()
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
-        // パスワード入力欄（目隠し切り替え付き）
         OutlinedTextField(
             value = password,
             onValueChange = { password = it },
@@ -83,10 +76,8 @@ fun RegisterScreen(onBack: () -> Unit) {
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // 登録ボタンの処理
         Button(
             onClick = {
-                // 入力値のバリデーション処理
                 errorMessage = when {
                     name.isBlank() || email.isBlank() || password.isBlank() ->
                         "すべての項目を入力してください。"
@@ -97,7 +88,6 @@ fun RegisterScreen(onBack: () -> Unit) {
                     else -> null
                 }
 
-                // エラーがなければ登録処理を呼び出す
                 if (errorMessage == null) {
                     registerUser(email, password, name) { success, error ->
                         if (success) {
@@ -113,22 +103,21 @@ fun RegisterScreen(onBack: () -> Unit) {
             Text("登録", fontWeight = FontWeight.Bold)
         }
 
-        // エラーメッセージがある場合に表示する
         errorMessage?.let {
             Spacer(modifier = Modifier.height(16.dp))
             Text(it, color = MaterialTheme.colorScheme.error)
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
-        // ログイン画面への案内リンク
         Text(
             "アカウントをお持ちの方はこちら",
-            color = MaterialTheme.colorScheme.primary,
             fontSize = 12.sp,
+            color = MaterialTheme.colorScheme.primary,
             modifier = Modifier
                 .clickable { onBack() }
                 .padding(top = 8.dp)
         )
     }
 }
+
