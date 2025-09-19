@@ -1,4 +1,3 @@
-
 package com.example.fergietime
 
 import android.os.Bundle
@@ -62,7 +61,6 @@ class MainActivity : ComponentActivity() {
                             // ログイン画面
                             composable("login") {
                                 LoginScreen(
-                                    onBack = {},
                                     onNavigateToRegister = { navController.navigate("register") },
                                     onNavigateToReset = { navController.navigate("reset") },
                                     onLoginSuccess = {

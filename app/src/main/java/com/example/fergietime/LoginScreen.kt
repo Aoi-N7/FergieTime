@@ -26,7 +26,6 @@ import com.google.firebase.firestore.FirebaseFirestore
 
 @Composable
 fun LoginScreen(
-    onBack: () -> Unit, // 「戻る」ボタン押下時の遷移処理
     onNavigateToRegister: () -> Unit, // 新規登録画面への遷移
     onNavigateToReset: () -> Unit, // パスワードリセット画面への遷移
     onLoginSuccess: (String) -> Unit // ログイン成功後に渡される名前
@@ -181,10 +180,5 @@ fun LoginScreen(
         )
 
         Spacer(modifier = Modifier.height(24.dp))
-
-        // 戻るボタン
-        OutlinedButton(onClick = onBack) {
-            Text("戻る")
-        }
     }
 }
