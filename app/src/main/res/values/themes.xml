@@ -1,5 +1,12 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <style name="Base.Theme.FergieTime" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/emergency_red</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorSecondary">@color/safe_green</item>
+        <item name="colorOnSecondary">@color/white</item>
+        <item name="android:statusBarColor">@color/emergency_red</item>
+    </style>
 
-    <style name="Theme.FergieTime" parent="android:Theme.Material.Light.NoActionBar" />
+    <style name="Theme.FergieTime" parent="Base.Theme.FergieTime" />
 </resources>
+

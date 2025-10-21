@@ -15,3 +15,17 @@ buildscript {
         classpath("com.google.gms:google-services:4.3.10")
     }
 }
+
+// プロジェクト全体で使用する変数を定義
+extra.apply {
+    set("compose_version", "1.4.6")  // 1.5.3から1.4.6に変更（Kotlin 1.8.20と互換）
+    set("kotlin_version", "1.8.20")
+    set("compileSdk", 34)
+    set("minSdk", 24)
+    set("targetSdk", 34)
+}
+
+// クリーンタスク
+tasks.register("clean", Delete::class) {
+    delete(rootProject.buildDir)
+}

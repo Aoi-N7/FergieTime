@@ -1,0 +1,10 @@
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="emergency_red">#FFE53E3E</color>
+    <color name="safe_green">#FF38A169</color>
+    <color name="warning_orange">#FFFF5722</color>
+    <color name="info_blue">#FF2196F3</color>
+    <color name="warning_yellow">#FFFFC107</color>
+</resources>
+
