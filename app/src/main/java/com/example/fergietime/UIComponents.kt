@@ -1,3 +1,5 @@
+
+/*
 package com.example.fergietime
 // Jetpack Compose UI関連
 import androidx.compose.foundation.clickable
@@ -314,3 +316,5 @@ fun ShelterListItem(
 // ================== HELPER FUNCTIONS ==================
 
 // 距離を人間にわかりやすい形式に変換する関数
+
+*/

@@ -23,7 +23,6 @@ android {
         versionCode = 1
         versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-
         vectorDrawables {
             useSupportLibrary = true
         }
@@ -53,10 +52,8 @@ android {
     }
 
     buildFeatures {
-        compose = true // ← Viewベースに変更
+        compose = false // ← Viewベースに変更
         viewBinding = true // 任意、使いたければ
-        buildConfig = true
-
     }
 
     compileOptions {
@@ -67,11 +64,13 @@ android {
     kotlinOptions {
         jvmTarget = "11"
     }
-
+    buildFeatures {
+        buildConfig = true
+        compose = true
+    }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.1"
     }
-
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
@@ -81,7 +80,7 @@ android {
 
 // 依存関係
 dependencies {
-    // Android Core & Compose 基本
+    // 初期
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -90,53 +89,68 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
-    implementation("androidx.appcompat:appcompat:1.6.1")
+    implementation(libs.play.services.maps)
+    implementation(libs.material)
+    implementation("androidx.appcompat:appcompat:1.6.1") // AppCompat 必須
     implementation("com.google.android.material:material:1.12.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
-    implementation("androidx.cardview:cardview:1.0.0")
-    implementation("androidx.fragment:fragment-ktx:1.6.1")
-    implementation("androidx.activity:activity-ktx:1.7.2")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
+    implementation(libs.androidx.navigation.compose.android)
+    implementation(libs.androidx.runtime.livedata)
+
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation(libs.androidx.ui.test.junit4)
+    debugImplementation(libs.androidx.ui.tooling)
+    debugImplementation(libs.androidx.ui.test.manifest)
+
+    // Google Play Location
+    implementation("com.google.android.gms:play-services-location:21.0.1")
+
+    // Lifecycle
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.6.2")
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.6.2")
 
-    // Google Maps
-    implementation("com.google.android.gms:play-services-maps:19.0.0")
+    // Firebase BOM（これでバージョン統一）
+    implementation(platform("com.google.firebase:firebase-bom:33.8.0"))
+
+    // Firebase Authentication + Firestore（必要なものだけ）
+    implementation("com.google.firebase:firebase-auth-ktx")
+    implementation("com.google.android.gms:play-services-auth:20.7.0")
+    implementation ("com.google.firebase:firebase-database-ktx:21.0.0")
+    implementation("com.google.android.gms:play-services-auth:21.3.0")
+    implementation("com.google.firebase:firebase-firestore-ktx")
+
+    // Analytics（使っている場合のみ）
+    implementation("com.google.firebase:firebase-analytics-ktx")
+
+    implementation("androidx.compose.material:material-icons-extended:1.6.0") // バージョンはComposeに合わせて
+
+    //Google Map API
     implementation("com.google.maps.android:maps-compose:6.1.0")
+    implementation("com.google.android.gms:play-services-maps:19.0.0")
     implementation("com.google.maps.android:android-maps-utils:2.2.5")
 
-    // Google Location & Directions
-    implementation("com.google.android.gms:play-services-location:21.0.1")
+    // Google Directions API
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
-    implementation("org.json:json:20240303")
+    implementation("org.json:json:20240303") // JSONパース用
 
-    // Firebase
-    implementation(platform("com.google.firebase:firebase-bom:33.8.0"))
-    implementation("com.google.firebase:firebase-auth-ktx")
-    implementation("com.google.firebase:firebase-database-ktx:21.0.0")
-    implementation("com.google.firebase:firebase-firestore-ktx")
-    implementation("com.google.firebase:firebase-analytics-ktx")
-    implementation("com.google.android.gms:play-services-auth:21.3.0")
+    // 追加(UI用)
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation(libs.androidx.ui.test.junit4)
+    debugImplementation(libs.androidx.ui.tooling)
+    debugImplementation(libs.androidx.ui.test.manifest)
 
     // ARCore
     implementation("com.google.ar:core:1.39.0")
 
-    // CameraX（ARナビなど用）
+    // CameraX - エミュレーター対応版
     implementation("androidx.camera:camera-core:1.2.3")
     implementation("androidx.camera:camera-camera2:1.2.3")
     implementation("androidx.camera:camera-lifecycle:1.2.3")
     implementation("androidx.camera:camera-view:1.2.3")
-
-    // Compose 拡張
-    implementation("androidx.compose.material:material-icons-extended:1.6.0")
-    implementation(libs.androidx.navigation.compose.android)
-
-    // テスト & デバッグ
-    testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test.ext:junit:1.1.5")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
-    androidTestImplementation(platform(libs.androidx.compose.bom))
-    androidTestImplementation("androidx.compose.ui:ui-test-junit4")
-    debugImplementation("androidx.compose.ui:ui-tooling")
-    debugImplementation("androidx.compose.ui:ui-test-manifest")
 }
