@@ -10,7 +10,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-
+//現在の状況入力（テキスト）
 @Composable
 fun CommentInputSection(viewModel: SafetyStatusViewModel) {
     val statusText = viewModel.statusText
