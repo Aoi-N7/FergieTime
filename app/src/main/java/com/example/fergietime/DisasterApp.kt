@@ -1,98 +1,60 @@
 package com.example.fergietime
 
-import android.app.Activity
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.disasterapp.screens.*
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.os.LocaleListCompat
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DisasterApp() {
-    val navController = rememberNavController()
-    var currentRoute by remember { mutableStateOf("home") }
+    val navController: NavHostController = rememberNavController()
+    val context = LocalContext.current
 
-    val viewModel: SafetyStatusViewModel = viewModel()
+    // ▼ 保存された言語タグを監視
+    val savedLang by LanguageManager.languageFlow(context).collectAsState(initial = "")
 
-    Scaffold(
-        bottomBar = {
-            BottomNavigationBar(
-                currentRoute = currentRoute,
-                onTabSelected = { route ->
-                    currentRoute = route
-                    navController.navigate(route) {
-                        popUpTo(navController.graph.startDestinationId)
-                        launchSingleTop = true
-                    }
-                }
+    // ▼ 保存済み言語を起動時に自動適用
+    LaunchedEffect(savedLang) {
+        if (savedLang.isNotBlank()) {
+            AppCompatDelegate.setApplicationLocales(
+                LocaleListCompat.forLanguageTags(savedLang)
             )
         }
-    ) { paddingValues ->
-        NavHost(
-            navController = navController,
-            startDestination = "home",
-            modifier = Modifier.padding(paddingValues)
-        ) {
-            composable("home") {
-                HomeScreen(
-                    onNavigateToEvacuation = {
-                        navController.navigate("evacuation")
-                    },
-                    viewModel = viewModel
-                )
-            }
-            composable("map") {
-                val context = LocalContext.current
-                val activity = context as? Activity
+    }
 
-                activity?.let {
-                    MapScreen(
-                        activity = it,
-                        onPersonClick = { personId ->
-                            navController.navigate("person_detail/$personId")
-                        },
-                        onNavigateToEvacuation = {
-                            navController.navigate("evacuation")
-                        }
+    // ▼ アプリ全体のテーマとナビゲーション構成
+    MaterialTheme {
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background
+        ) {
+            NavHost(
+                navController = navController,
+                startDestination = "settings"
+            ) {
+                // 設定一覧
+                composable("settings") {
+                    SettingsScreen(onSettingClick = { selectedId ->
+                        navController.navigate("detail/$selectedId")
+                    })
+                }
+
+                // 設定詳細（言語設定など）
+                composable("detail/{id}") { backStackEntry ->
+                    val id = backStackEntry.arguments?.getString("id")
+                    SettingDetailScreen(
+                        selectedSettingId = id,
+                        onBack = { navController.popBackStack() }
                     )
                 }
-            }
-
-            composable("safety") {
-                SafetyScreen(
-                    onPersonClick = { personId ->
-                        navController.navigate("person_detail/$personId")
-                    },
-                    viewModel = viewModel
-                )
-            }
-            composable("settings") {
-                SettingsScreen(
-                    onSettingClick = { settingId ->
-                        navController.navigate("setting_detail/$settingId")
-                    }
-                )
-            }
-            composable("evacuation") {
-                EvacuationMapScreen(
-                    onBack = { navController.popBackStack() }
-                )
-            }
-            composable("person_detail/{personId}") {
-                PersonDetailScreen(
-                    onBack = { navController.popBackStack() }
-                )
-            }
-            composable("setting_detail/{settingId}") {
-                SettingDetailScreen(
-                    onBack = { navController.popBackStack() }
-                )
             }
         }
     }

@@ -22,33 +22,37 @@ fun SettingDetailScreen(
     selectedSettingId: String?,
     onBack: () -> Unit
 ) {
-    val base = selectedSettingId?.let { getSettingData(it) }
-    if (base == null) {
+    val settingData = selectedSettingId?.let { getSettingData(it) }
+    if (settingData == null) {
         onBack()
         return
     }
 
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    val isLanguage = settingData.id == "language"
 
-    val options = remember(base) {
-        mutableStateListOf<SettingOption>().apply { addAll(base.options) }
+    // ▼ optionsをmutableStateListOfで保持（選択更新用）
+    val options = remember(settingData) {
+        mutableStateListOf<SettingOption>().apply { addAll(settingData.options) }
     }
-    val isLanguage = base.id == "language"
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
                     Text(
-                        text = base.title,
+                        text = settingData.title,
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold
                     )
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "戻る")
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = "戻る"
+                        )
                     }
                 }
             )
@@ -61,15 +65,18 @@ fun SettingDetailScreen(
                 .padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+            // ▼ 各オプションの描画
             items(options, key = { it.title + (it.languageTag ?: "") }) { option ->
                 val idx = options.indexOf(option)
                 SettingOptionCard(
                     option = option,
+                    // ▼ 言語設定時のみクリック処理を定義
                     onClick = if (isLanguage) { clicked ->
                         val tag = clicked.languageTag ?: return@SettingOptionCard
-                        // 1) 言語保存 & 即反映
+                        // 保存＋即反映
                         scope.launch { LanguageManager.setLanguage(context, tag) }
-                        // 2) UI選択状態を更新
+
+                        // 選択状態をUIに反映（✓と「現在選択中」更新）
                         val updated = options.mapIndexed { i, o ->
                             if (i == idx) o.copy(selected = true, description = "現在選択中")
                             else o.copy(selected = false, description = if (o.selectable) null else o.description)
