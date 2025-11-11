@@ -18,8 +18,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.fergietime.SettingOption
+
+
 
 @Composable
+
 fun SettingOptionCard(
     option: SettingOption,
     onClick: ((SettingOption) -> Unit)? = null,
@@ -28,6 +32,7 @@ fun SettingOptionCard(
     // 既存の isEnabled をローカルに保持（トグル用／必要な場合のみ）
     val enabledState = remember(option) { mutableStateOf(option.isEnabled) }
     val clickable = option.selectable || onClick != null
+    val hasToggle: Boolean = false
 
     Card(
         modifier = Modifier
@@ -68,7 +73,7 @@ fun SettingOptionCard(
                 }
                 // ▼ 追加：言語などの単一選択行で、選択中はチェック表示
                 option.selectable && option.selected -> {
-                    Icon(imageVector = Icons.Default.Check, contentDescription = null)
+                    Icon(imageVector = Icons.Default.Check, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
                 }
             }
         }
