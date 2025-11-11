@@ -2,23 +2,23 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-
-    <!-- インターネットアクセスのパーミッションを追加 -->
+    <!-- 権限をここにまとめる -->
+    <!-- インターネット接続 -->
     <uses-permission android:name="android.permission.INTERNET"/>
-
-    <!-- この権限は常に含める -->
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-
-    <!-- アプリが正確な位置情報アクセスから利益を得る場合のみ含める -->
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- ネットワーク状態の確認 -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <!-- 位置情報 (正確 & おおよそ) -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
+    <!-- フォアグラウンドサービス (位置情報をバックグラウンドで使う場合など) -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
+
+    <!-- 通知 (Android 13以降で必要) -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
 
     <application
         android:allowBackup="true"
@@ -30,14 +30,13 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.FergieTime"
         tools:targetApi="31">
-        <!--android:theme="@style/Theme.FergieTime.Light.DarkActionBar">-->
 
-        <!-- Google Map APIのアクセストークンを指定するためのメタデータ -->
+        <!-- Google Map APIキーのメタデータ -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="${MAPS_API_KEY}" />
 
-
+        <!-- メインアクティビティ -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -45,7 +44,6 @@
             android:theme="@style/Theme.FergieTime">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
