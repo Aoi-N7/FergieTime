@@ -3,7 +3,10 @@ package com.example.fergietime
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
@@ -43,17 +46,27 @@ fun DisasterApp() {
                 // 設定一覧
                 composable("settings") {
                     SettingsScreen(onSettingClick = { selectedId ->
-                        navController.navigate("detail/$selectedId")
+                        // ★ SettingDetailScreen を使わず「ユーザー設定」だけ専用画面へ直行
+                        if (selectedId == "user") {
+                            navController.navigate("userinfo")
+                        } else {
+                            navController.navigate("detail/$selectedId")
+                        }
                     })
                 }
 
-                // 設定詳細（言語設定など）
+                // 既存の詳細（言語/テーマ/通知/キャッシュ/バージョン等）は従来どおり
                 composable("detail/{id}") { backStackEntry ->
                     val id = backStackEntry.arguments?.getString("id")
                     SettingDetailScreen(
                         selectedSettingId = id,
                         onBack = { navController.popBackStack() }
                     )
+                }
+
+                // ★ 新規：ユーザー情報編集画面（ローカル編集＋保存ボタンのみ）
+                composable("userinfo") {
+                    UserInfoScreen(onBack = { navController.popBackStack() })
                 }
             }
         }
