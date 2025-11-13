@@ -1,25 +1,28 @@
 package com.example.fergietime
 
+import android.app.Activity
+import android.content.Context
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.core.os.LocaleListCompat
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.appcompat.app.AppCompatDelegate
-import androidx.core.os.LocaleListCompat
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DisasterApp() {
     val navController: NavHostController = rememberNavController()
-    val context = LocalContext.current
+    val viewModel: SafetyStatusViewModel = viewModel()
+    val context = LocalContext.current           // ✅ Context取得
+    val activity = context.findActivity()        // ✅ Activity取得（拡張関数で対応）
 
     // ▼ 保存された言語タグを監視
     val savedLang by LanguageManager.languageFlow(context).collectAsState(initial = "")
@@ -33,42 +36,104 @@ fun DisasterApp() {
         }
     }
 
-    // ▼ アプリ全体のテーマとナビゲーション構成
+    var currentRoute by remember { mutableStateOf("home") }
+
     MaterialTheme {
         Surface(
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.background
         ) {
-            NavHost(
-                navController = navController,
-                startDestination = "settings"
-            ) {
-                // 設定一覧
-                composable("settings") {
-                    SettingsScreen(onSettingClick = { selectedId ->
-                        // ★ SettingDetailScreen を使わず「ユーザー設定」だけ専用画面へ直行
-                        if (selectedId == "user") {
-                            navController.navigate("userinfo")
-                        } else {
-                            navController.navigate("detail/$selectedId")
+            Scaffold(
+                bottomBar = {
+                    BottomNavigationBar(
+                        currentRoute = currentRoute,
+                        onTabSelected = { route ->
+                            currentRoute = route
+                            navController.navigate(route) {
+                                popUpTo(navController.graph.startDestinationId)
+                                launchSingleTop = true
+                            }
                         }
-                    })
-                }
-
-                // 既存の詳細（言語/テーマ/通知/キャッシュ/バージョン等）は従来どおり
-                composable("detail/{id}") { backStackEntry ->
-                    val id = backStackEntry.arguments?.getString("id")
-                    SettingDetailScreen(
-                        selectedSettingId = id,
-                        onBack = { navController.popBackStack() }
                     )
                 }
+            ) { paddingValues ->
+                NavHost(
+                    navController = navController,
+                    startDestination = "home",
+                    modifier = Modifier.padding(paddingValues)
+                ) {
+                    composable("home") {
+                        HomeScreen(
+                            onNavigateToEvacuation = {
+                                navController.navigate("evacuation")
+                            },
+                            viewModel = viewModel
+                        )
+                    }
 
-                // ★ 新規：ユーザー情報編集画面（ローカル編集＋保存ボタンのみ）
-                composable("userinfo") {
-                    UserInfoScreen(onBack = { navController.popBackStack() })
+                    composable("map") {
+                        activity?.let {
+                            MapScreen(
+                                activity = it,
+                                onPersonClick = { personId ->
+                                    navController.navigate("person_detail/$personId")
+                                },
+                                onNavigateToEvacuation = {
+                                    navController.navigate("evacuation")
+                                }
+                            )
+                        }
+                    }
+
+                    composable("safety") {
+                        SafetyScreen(
+                            onPersonClick = { personId ->
+                                navController.navigate("person_detail/$personId")
+                            },
+                            viewModel = viewModel
+                        )
+                    }
+
+                    composable("settings") {
+                        SettingsScreen(
+                            onSettingClick = { settingId ->
+                                if (settingId == "user") {
+                                    navController.navigate("userinfo")
+                                } else {
+                                    navController.navigate("setting_detail/$settingId")
+                                }
+                            }
+                        )
+                    }
+
+                    composable("setting_detail/{settingId}") { backStackEntry ->
+                        val id = backStackEntry.arguments?.getString("settingId")
+                        SettingDetailScreen(
+                            selectedSettingId = id,
+                            onBack = { navController.popBackStack() }
+                        )
+                    }
+
+                    composable("userinfo") {
+                        UserInfoScreen(onBack = { navController.popBackStack() })
+                    }
+
+                    composable("evacuation") {
+                        EvacuationMapScreen(onBack = { navController.popBackStack() })
+                    }
+
+                    composable("person_detail/{personId}") {
+                        PersonDetailScreen(onBack = { navController.popBackStack() })
+                    }
                 }
             }
         }
     }
+}
+
+// ✅ Context → Activity へ変換する拡張関数
+fun Context.findActivity(): Activity? = when (this) {
+    is Activity -> this
+    is android.content.ContextWrapper -> baseContext.findActivity()
+    else -> null
 }
