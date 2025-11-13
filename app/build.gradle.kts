@@ -76,9 +76,12 @@ dependencies {
     // --- Android 基本 ---
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation("androidx.appcompat:appcompat:1.6.1")
+//    implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.12.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
+
+    implementation("androidx.appcompat:appcompat:1.7.0")   // ← 最新安定版
+    implementation("androidx.core:core-ktx:1.13.1")        // ← LocaleListCompat 用
 
     // --- Jetpack Compose ---
     implementation(platform("androidx.compose:compose-bom:2024.09.03"))
