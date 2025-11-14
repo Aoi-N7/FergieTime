@@ -5,7 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -19,19 +19,13 @@ fun SettingItem(
     icon: ImageVector,
     title: String,
     subtitle: String?,
-    onClick: () -> Unit,
-    isHighlighted: Boolean = false
+    onClick: () -> Unit
 ) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick() },
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        colors = if (isHighlighted) {
-            CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
-        } else {
-            CardDefaults.cardColors()
-        }
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Row(
             modifier = Modifier.padding(16.dp),
@@ -41,18 +35,18 @@ fun SettingItem(
                 imageVector = icon,
                 contentDescription = null,
                 modifier = Modifier.size(24.dp),
-                tint = if (isHighlighted) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                tint = MaterialTheme.colorScheme.onSurface
             )
-            
+
             Spacer(modifier = Modifier.width(16.dp))
-            
+
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = title,
                     fontWeight = FontWeight.Medium,
-                    color = if (isHighlighted) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                    color = MaterialTheme.colorScheme.onSurface
                 )
-                
+
                 if (subtitle != null) {
                     Text(
                         text = subtitle,
@@ -61,7 +55,7 @@ fun SettingItem(
                     )
                 }
             }
-            
+
             Icon(
                 imageVector = Icons.Default.ChevronRight,
                 contentDescription = null,
