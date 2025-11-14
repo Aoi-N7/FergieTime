@@ -37,8 +37,6 @@ android {
 
         // build.gradle ファイルに API キーを追加
         buildConfigField("String", "MAPS_API_KEY", "\"${localProperties.getProperty("MAPS_API_KEY")}\"")
-
-
     }
 
     buildTypes {
@@ -52,8 +50,9 @@ android {
     }
 
     buildFeatures {
-        compose = false // ← Viewベースに変更
-        viewBinding = true // 任意、使いたければ
+        buildConfig = true
+        compose = true
+        // viewBinding = true // Composeプロジェクトでは通常不要
     }
 
     compileOptions {
@@ -64,13 +63,11 @@ android {
     kotlinOptions {
         jvmTarget = "11"
     }
-    buildFeatures {
-        buildConfig = true
-        compose = true
-    }
+
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.1"
     }
+
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
@@ -80,63 +77,42 @@ android {
 
 // 依存関係
 dependencies {
-    // 初期
+    // --- AndroidX 基本ライブラリ ---
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.navigation.compose.android) // Navigation Compose
+    implementation(libs.androidx.runtime.livedata) // LiveData (もし使うなら)
+
+    // --- Compose BOM (バージョン管理) ---
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
-    implementation(libs.play.services.maps)
-    implementation(libs.material)
-    implementation("androidx.appcompat:appcompat:1.6.1") // AppCompat 必須
-    implementation("com.google.android.material:material:1.12.0")
-    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
-    implementation(libs.androidx.navigation.compose.android)
-    implementation(libs.androidx.runtime.livedata)
+    implementation("androidx.compose.material:material-icons-extended:1.6.0")
 
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
-    androidTestImplementation(libs.androidx.ui.test.junit4)
-    debugImplementation(libs.androidx.ui.tooling)
-    debugImplementation(libs.androidx.ui.test.manifest)
-
-    // Google Play Location
-    implementation("com.google.android.gms:play-services-location:21.0.1")
-
-    // Lifecycle
-    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.6.2")
-    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.6.2")
-
-    // Firebase BOM（これでバージョン統一）
-    implementation(platform("com.google.firebase:firebase-bom:33.8.0"))
-
-    // Firebase Authentication + Firestore（必要なものだけ）
-    implementation("com.google.firebase:firebase-auth-ktx")
-    implementation("com.google.android.gms:play-services-auth:20.7.0")
-    implementation ("com.google.firebase:firebase-database-ktx:21.0.0")
-    implementation("com.google.android.gms:play-services-auth:21.3.0")
-    implementation("com.google.firebase:firebase-firestore-ktx")
-
-    // Analytics（使っている場合のみ）
-    implementation("com.google.firebase:firebase-analytics-ktx")
-
-    implementation("androidx.compose.material:material-icons-extended:1.6.0") // バージョンはComposeに合わせて
-
-    //Google Map API
-    implementation("com.google.maps.android:maps-compose:6.1.0")
+    // --- Google Play Services ---
+    implementation("com.google.android.gms:play-services-location:21.3.0") // ★ 新しいバージョンに更新
     implementation("com.google.android.gms:play-services-maps:19.0.0")
+    implementation("com.google.android.gms:play-services-auth:21.3.0") // 重複を整理
+
+    // --- Google Maps for Compose ---
+    implementation("com.google.maps.android:maps-compose:6.1.0")
     implementation("com.google.maps.android:android-maps-utils:2.2.5")
 
-    // Google Directions API
-    implementation("com.squareup.okhttp3:okhttp:4.12.0")
-    implementation("org.json:json:20240303") // JSONパース用
+    // --- Firebase BOM (バージョン管理) ---
+    implementation(platform("com.google.firebase:firebase-bom:33.1.2")) // ★ 新しいバージョンに更新
+    implementation("com.google.firebase:firebase-auth") // -ktxは不要
+    implementation("com.google.firebase:firebase-firestore") // -ktxは不要
+    implementation("com.google.firebase:firebase-database") // -ktxは不要
+    implementation("com.google.firebase:firebase-analytics") // -ktxは不要
 
-    // 追加(UI用)
+    // --- その他 ---
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation("org.json:json:20240303")
+
+    // --- テスト関連 (重複を整理) ---
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
