@@ -132,4 +132,5 @@ dependencies {
     implementation("androidx.camera:camera-view:1.2.3")
 
     implementation("com.google.android.material:material:1.10.0")
+    implementation("androidx.datastore:datastore-preferences:1.1.1")
 }
