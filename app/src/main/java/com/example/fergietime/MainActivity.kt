@@ -2,7 +2,6 @@ package com.example.fergietime
 
 import android.os.Bundle
 import android.content.Context
-import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material3.*
@@ -13,7 +12,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.google.firebase.FirebaseApp
-import com.google.firebase.auth.FirebaseAuth
 import com.example.fergietime.ui.theme.FergieTimeTheme
 
 // アプリのメインアクティビティ。ログイン状態に応じて画面を切り替える
