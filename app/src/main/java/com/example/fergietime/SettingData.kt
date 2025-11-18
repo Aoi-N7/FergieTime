@@ -120,7 +120,8 @@ fun getSettingData(settingId: String): SettingData? {
 @Composable
 fun SettingDetailScreen(
     selectedSettingId: String?,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onThemeChanged: (ThemeMode) -> Unit
 ) {
     val settingData = selectedSettingId?.let { getSettingData(it) }
     if (settingData == null) {

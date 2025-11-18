@@ -16,7 +16,8 @@ import androidx.compose.ui.unit.sp
 
 @Composable
 fun SettingsScreen(
-    onSettingClick: (String) -> Unit
+    onSettingClick: (String) -> Unit,
+    onThemeChanged: (ThemeMode) -> Unit
 ) {
     LazyColumn(
         modifier = Modifier
