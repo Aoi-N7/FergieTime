@@ -29,9 +29,9 @@ fun FergieTimeTheme(
     content: @Composable () -> Unit
 ) {
     val darkTheme = when(themeMode) {
-        ThemeMode.LIGHT -> false
-        ThemeMode.DARK -> true
-        ThemeMode.SYSTEM -> isSystemInDarkTheme()
+        ThemeMode.ライト -> false
+        ThemeMode.ダーク -> true
+        ThemeMode.自動 -> isSystemInDarkTheme()
     }
 
     // あとは今までの色設定を使う

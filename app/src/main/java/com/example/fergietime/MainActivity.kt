@@ -31,7 +31,7 @@ class MainActivity : ComponentActivity() {
         setContent {
 
             // ▼ ① テーマ状態をアプリ全体で保持
-            var themeMode by remember { mutableStateOf(ThemeMode.SYSTEM) }
+            var themeMode by remember { mutableStateOf(ThemeMode.自動) }
 
             // ▼ ② FergieTimeTheme に渡す
             FergieTimeTheme(themeMode = themeMode) {

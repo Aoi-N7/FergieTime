@@ -21,7 +21,7 @@ import androidx.navigation.compose.rememberNavController
 fun DisasterApp(
     onThemeChanged: (ThemeMode) -> Unit
 ) {
-    var themeMode by remember { mutableStateOf(ThemeMode.SYSTEM) }
+    var themeMode by remember { mutableStateOf(ThemeMode.自動) }
     val navController: NavHostController = rememberNavController()
     val viewModel: SafetyStatusViewModel = viewModel()
     val context = LocalContext.current
@@ -115,7 +115,7 @@ fun DisasterApp(
                     SettingDetailScreen(
                         selectedSettingId = id,
                         onBack = { navController.popBackStack() },
-                        onThemeChanged = onThemeChanged    // ★ ここにも渡す
+                        onThemeChanged = onThemeChanged
                     )
                 }
 

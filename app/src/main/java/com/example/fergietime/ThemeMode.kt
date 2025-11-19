@@ -1,7 +1,7 @@
 package com.example.fergietime
 
 enum class ThemeMode {
-    LIGHT,
-    DARK,
-    SYSTEM
+    ライト,
+    ダーク,
+    自動
 }
