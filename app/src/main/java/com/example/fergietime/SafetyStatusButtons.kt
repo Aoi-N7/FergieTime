@@ -4,18 +4,23 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.text.font.FontWeight
 
+/**
+ * 複数の安否状況ボタンを横並びで表示するコンポーネント。
+ * 選択されているボタンは色が変わる。
+ */
 @Composable
 fun SafetyStatusButtons(viewModel: SafetyStatusViewModel) {
     val selectedStatus = viewModel.selectedStatus
 
+    // 表示するステータスリスト
     val statuses = listOf(
         Triple("安全", Color(0xFF4CAF50), Icons.Default.Person),
         Triple("避難中", Color(0xFFFF9800), Icons.Default.Person),
@@ -28,8 +33,6 @@ fun SafetyStatusButtons(viewModel: SafetyStatusViewModel) {
     ) {
         statuses.forEach { (text, color, icon) ->
             val isSelected = selectedStatus == text
-            val backgroundColor = if (isSelected) color else Color(0xFFF5F5F5)
-            val contentColor = if (isSelected) Color.White else Color.Gray
 
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 IconButton(
@@ -38,7 +41,7 @@ fun SafetyStatusButtons(viewModel: SafetyStatusViewModel) {
                 ) {
                     Card(
                         modifier = Modifier.fillMaxSize(),
-                        colors = CardDefaults.cardColors(containerColor = backgroundColor),
+                        colors = CardDefaults.cardColors(containerColor = if (isSelected) color else Color(0xFFF5F5F5)),
                         elevation = CardDefaults.cardElevation(defaultElevation = if (isSelected) 4.dp else 1.dp)
                     ) {
                         Box(
@@ -48,13 +51,15 @@ fun SafetyStatusButtons(viewModel: SafetyStatusViewModel) {
                             Icon(
                                 imageVector = icon,
                                 contentDescription = null,
-                                tint = contentColor,
+                                tint = if (isSelected) Color.White else Color.Gray,
                                 modifier = Modifier.size(32.dp)
                             )
                         }
                     }
                 }
+
                 Spacer(modifier = Modifier.height(8.dp))
+
                 Text(
                     text = text,
                     fontSize = 12.sp,
@@ -66,7 +71,10 @@ fun SafetyStatusButtons(viewModel: SafetyStatusViewModel) {
     }
 }
 
-
+/**
+ * 単体の安否状況ボタン。
+ * SafetyStatusButtons で使うことも単独で使うこともできる。
+ */
 @Composable
 fun SafetyStatusButton(
     text: String,
@@ -75,12 +83,10 @@ fun SafetyStatusButton(
 ) {
     val backgroundColor = if (isSelected) color else Color(0xFFF5F5F5)
     val contentColor = if (isSelected) Color.White else Color.Gray
-    
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
+
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
         IconButton(
-            onClick = { },
+            onClick = { /* クリック処理は呼び出し元で実装 */ },
             modifier = Modifier.size(64.dp)
         ) {
             Card(
@@ -101,9 +107,9 @@ fun SafetyStatusButton(
                 }
             }
         }
-        
+
         Spacer(modifier = Modifier.height(8.dp))
-        
+
         Text(
             text = text,
             fontSize = 12.sp,

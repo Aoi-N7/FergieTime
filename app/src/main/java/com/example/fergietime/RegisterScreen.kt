@@ -1,3 +1,10 @@
+/**
+ * ユーザーの新規登録画面（RegisterScreen）の UI コンポーネントを提供するファイル。
+ *
+ * 名前・メールアドレス・パスワードを入力してアカウント登録を行う画面を構築。
+ * 入力チェックやパスワード表示切替、登録処理結果のエラーメッセージ表示をサポートする。
+ */
+
 package com.example.fergietime
 
 import androidx.compose.foundation.clickable
@@ -18,6 +25,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 
+// 新規登録画面コンポーネント
 @Composable
 fun RegisterScreen(onBack: () -> Unit) {
     var email by remember { mutableStateOf("") }
@@ -38,6 +46,7 @@ fun RegisterScreen(onBack: () -> Unit) {
 
         Spacer(modifier = Modifier.height(24.dp))
 
+        // 名前入力
         OutlinedTextField(
             value = name,
             onValueChange = { name = it },
@@ -48,6 +57,7 @@ fun RegisterScreen(onBack: () -> Unit) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        // メールアドレス入力
         OutlinedTextField(
             value = email,
             onValueChange = { email = it },
@@ -58,6 +68,7 @@ fun RegisterScreen(onBack: () -> Unit) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        // パスワード入力（表示切替付き）
         OutlinedTextField(
             value = password,
             onValueChange = { password = it },
@@ -76,6 +87,7 @@ fun RegisterScreen(onBack: () -> Unit) {
 
         Spacer(modifier = Modifier.height(24.dp))
 
+        // 登録ボタン
         Button(
             onClick = {
                 errorMessage = when {
@@ -103,6 +115,7 @@ fun RegisterScreen(onBack: () -> Unit) {
             Text("登録", fontWeight = FontWeight.Bold)
         }
 
+        // エラーメッセージ表示
         errorMessage?.let {
             Spacer(modifier = Modifier.height(16.dp))
             Text(it, color = MaterialTheme.colorScheme.error)
@@ -110,6 +123,7 @@ fun RegisterScreen(onBack: () -> Unit) {
 
         Spacer(modifier = Modifier.height(24.dp))
 
+        // 既存ユーザー向けログイン誘導
         Text(
             "アカウントをお持ちの方はこちら",
             fontSize = 12.sp,
@@ -120,4 +134,3 @@ fun RegisterScreen(onBack: () -> Unit) {
         )
     }
 }
-

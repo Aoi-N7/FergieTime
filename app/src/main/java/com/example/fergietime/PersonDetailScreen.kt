@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @OptIn(ExperimentalMaterial3Api::class)
+// 個人詳細画面（アバター・ステータス・コメント・画像などを表示）
 @Composable
 fun PersonDetailScreen(onBack: () -> Unit) {
     Scaffold(
@@ -40,21 +41,14 @@ fun PersonDetailScreen(onBack: () -> Unit) {
                 .padding(paddingValues),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            item {
-                PersonHeader()
-            }
-            
-            item {
-                PersonImage()
-            }
-            
-            item {
-                CommentSection()
-            }
+            item { PersonHeader() }
+            item { PersonImage() }
+            item { CommentSection() }
         }
     }
 }
 
+// 個人情報ヘッダー（名前・ステータス・メッセージ・時間・場所など）
 @Composable
 fun PersonHeader() {
     Row(
@@ -78,29 +72,27 @@ fun PersonHeader() {
                 )
             }
         }
-        
+
         Spacer(modifier = Modifier.width(12.dp))
-        
+
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = "祖父(山田正男)",
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold
             )
-            
+
             Spacer(modifier = Modifier.height(4.dp))
-            
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+
+            Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text = "59分前",
                     fontSize = 14.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                
+
                 Spacer(modifier = Modifier.width(8.dp))
-                
+
                 Card(
                     colors = CardDefaults.cardColors(containerColor = Color(0xFFF44336)),
                     shape = RoundedCornerShape(8.dp)
@@ -115,7 +107,7 @@ fun PersonHeader() {
                 }
             }
         }
-        
+
         IconButton(onClick = { }) {
             Icon(
                 imageVector = Icons.Default.MoreHoriz,
@@ -123,21 +115,17 @@ fun PersonHeader() {
             )
         }
     }
-    
-    Column(
-        modifier = Modifier.padding(horizontal = 16.dp)
-    ) {
+
+    Column(modifier = Modifier.padding(horizontal = 16.dp)) {
         Text(
             text = "救助が来て一人で避難できません。",
             fontSize = 14.sp,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
-        
+
         Spacer(modifier = Modifier.height(8.dp))
-        
-        Row(
-            verticalAlignment = Alignment.CenterVertically
-        ) {
+
+        Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
                 text = "12時34分",
                 fontSize = 14.sp,
@@ -153,6 +141,7 @@ fun PersonHeader() {
     }
 }
 
+// 個人の写真またはアバター表示エリア
 @Composable
 fun PersonImage() {
     Box(
@@ -173,6 +162,7 @@ fun PersonImage() {
     }
 }
 
+// コメント表示セクション
 @Composable
 fun CommentSection() {
     Card(
@@ -181,19 +171,17 @@ fun CommentSection() {
             .padding(horizontal = 16.dp),
         colors = CardDefaults.cardColors(containerColor = Color(0xFFF5F5F5))
     ) {
-        Row(
-            modifier = Modifier.padding(16.dp)
-        ) {
+        Row(modifier = Modifier.padding(16.dp)) {
             Card(
                 modifier = Modifier.size(32.dp),
                 colors = CardDefaults.cardColors(containerColor = Color.Black),
                 shape = MaterialTheme.shapes.extraLarge
             ) {
-                // Empty avatar for comment
+                // 空のアバター（コメント用）
             }
-            
+
             Spacer(modifier = Modifier.width(12.dp))
-            
+
             Text(
                 text = "さすがに笑えない状況",
                 fontSize = 14.sp,

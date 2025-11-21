@@ -1,5 +1,13 @@
+/**
+ * 安否確認画面（SafetyScreen）の UI コンポーネントを提供するファイル。
+ *
+ * 自分の安否状況、家族・友達の安否状況を確認・入力できる画面を構築。
+ * Firestore 上のデータ取得や状態更新もサポート。
+ */
+
 package com.example.fergietime
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
@@ -14,6 +22,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.disasterapp.components.PersonCard
 
+/**
+ * 安否確認画面全体。
+ * Firestore から起動時にデータをロードし、
+ * 自分・家族・友達の安否情報を LazyColumn で表示。
+ */
 @Composable
 fun SafetyScreen(
     onPersonClick: (String) -> Unit,
@@ -36,6 +49,10 @@ fun SafetyScreen(
     }
 }
 
+/**
+ * 自分の安否状況セクション。
+ * 安全ボタンや自由入力テキストを使って安否情報を更新できる。
+ */
 @Composable
 fun MySafetyStatusSection(viewModel: SafetyStatusViewModel) {
     val message = if (viewModel.isRegistered) viewModel.statusText else "未入力"
@@ -78,6 +95,7 @@ fun MySafetyStatusSection(viewModel: SafetyStatusViewModel) {
 
         Spacer(modifier = Modifier.height(8.dp))
 
+        // 現在の安否状況表示
         Text(
             text = "$message（$time）",
             fontSize = 14.sp,
@@ -86,6 +104,7 @@ fun MySafetyStatusSection(viewModel: SafetyStatusViewModel) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        // テキスト入力による自由メッセージ登録
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(containerColor = Color(0xFFF5F5F5))
@@ -133,6 +152,10 @@ fun MySafetyStatusSection(viewModel: SafetyStatusViewModel) {
     }
 }
 
+/**
+ * 家族セクション。
+ * PersonCard を使って家族メンバーの安否情報を表示。
+ */
 @Composable
 fun FamilySection(onPersonClick: (String) -> Unit) {
     Column {
@@ -162,6 +185,11 @@ fun FamilySection(onPersonClick: (String) -> Unit) {
     }
 }
 
+/**
+ * 友達セクション。
+ * PersonCard を使って友達の安否情報を表示。
+ * showCard = false で Card 内部のみを表示。
+ */
 @Composable
 fun FriendsSection(onPersonClick: (String) -> Unit) {
     Column {

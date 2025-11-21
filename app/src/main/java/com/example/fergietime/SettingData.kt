@@ -17,12 +17,11 @@ import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 import com.example.fergietime.SettingOptionCard
 
-
-
+// 設定カテゴリのデータクラス
 data class SettingData(
     val id: String,
     val title: String,
-    val options: List<SettingOption>
+    val options: List<SettingOption> // 各設定項目
 )
 
 // ▼ 仮のデータ取得関数
@@ -119,20 +118,23 @@ fun getSettingData(settingId: String): SettingData? {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingDetailScreen(
-    selectedSettingId: String?,
-    onBack: () -> Unit,
+    selectedSettingId: String?, // 選択された設定カテゴリID
+    onBack: () -> Unit,        // 戻るボタン押下時のコールバック
     onThemeChanged: (ThemeMode) -> Unit
 ) {
+    // 選択されたIDから設定データを取得
     val settingData = selectedSettingId?.let { getSettingData(it) }
     if (settingData == null) {
+        // データがない場合は前の画面に戻る
         onBack()
         return
     }
 
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    val isLanguage = settingData.id == "language"
+    val isLanguage = settingData.id == "language" // 言語設定かどうか
 
+    // 設定項目の状態を Compose 上で管理するリスト
     val options = remember(settingData) {
         mutableStateListOf<SettingOption>().apply { addAll(settingData.options) }
     }
@@ -156,17 +158,22 @@ fun SettingDetailScreen(
                 .padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+            // 設定項目を表示
             items(options, key = { it.title + (it.languageTag ?: "") }) { option ->
                 val idx = options.indexOf(option)
+
                 SettingOptionCard(
                     option = option,
                     onClick = if (isLanguage) { clicked ->
+                        // 言語設定の場合の処理
                         val tag = clicked.languageTag
                         if (tag != null) {
                             scope.launch {
+                                // 言語を切り替え
                                 LanguageManager.setLanguage(context, tag.toString())
                             }
 
+                            // 選択状態を更新
                             val updated = options.mapIndexed { i, o ->
                                 if (i == idx) o.copy(selected = true, description = "現在選択中")
                                 else o.copy(selected = false, description = null)

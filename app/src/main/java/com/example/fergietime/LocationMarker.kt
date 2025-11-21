@@ -1,3 +1,12 @@
+/**
+ * 地図上に表示する位置マーカー（現在地・目的地など）用の UI コンポーネントを
+ * 提供するファイル。
+ *
+ * LocationMarker は丸いアイコンとラベルを組み合わせて表示し、地図上の地点を
+ * 視覚的にわかりやすく示すために使用される。色・アイコン・テキストを自由に
+ * 指定でき、避難マップや位置情報関連画面で使われる。
+ */
+
 package com.example.fergietime
 
 import androidx.compose.foundation.layout.*
@@ -11,6 +20,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
+// 地図上に配置する位置マーカー（アイコン + ラベル）
 @Composable
 fun LocationMarker(
     backgroundColor: Color,
@@ -39,9 +49,9 @@ fun LocationMarker(
                 )
             }
         }
-        
+
         Spacer(modifier = Modifier.height(4.dp))
-        
+
         Card(
             colors = CardDefaults.cardColors(containerColor = Color.White),
             elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)

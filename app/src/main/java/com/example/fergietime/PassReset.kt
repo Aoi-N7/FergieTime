@@ -13,24 +13,29 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.platform.LocalContext
 import com.google.firebase.auth.FirebaseAuth
 
+// パスワード再設定画面のメインコンポーネント
 @Composable
 fun PasswordResetScreen(onBack: () -> Unit) {
     var email by remember { mutableStateOf("") }
     var message by remember { mutableStateOf<String?>(null) }
     val context = LocalContext.current
 
-    Box(
-        modifier = Modifier.fillMaxSize()
-    ) {
+    Box(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier.padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Spacer(modifier = Modifier.height(125.dp))
-            Text("パスワード再設定", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+            Text(
+                "パスワード再設定",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary
+            )
 
             Spacer(modifier = Modifier.height(50.dp))
 
+            // メールアドレス入力欄
             OutlinedTextField(
                 value = email,
                 onValueChange = { email = it },
@@ -41,6 +46,7 @@ fun PasswordResetScreen(onBack: () -> Unit) {
 
             Spacer(modifier = Modifier.height(24.dp))
 
+            // パスワード再設定メール送信ボタン
             Button(
                 onClick = {
                     if (email.isBlank()) {
@@ -63,6 +69,7 @@ fun PasswordResetScreen(onBack: () -> Unit) {
                 Text("パスワード再設定メールを送る")
             }
 
+            // メッセージ表示
             message?.let {
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(it, color = MaterialTheme.colorScheme.primary)
@@ -70,6 +77,7 @@ fun PasswordResetScreen(onBack: () -> Unit) {
 
             Spacer(modifier = Modifier.height(150.dp))
 
+            // 戻るボタン
             OutlinedButton(onClick = onBack) {
                 Text("戻る")
             }

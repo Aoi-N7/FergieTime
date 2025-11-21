@@ -1,31 +1,20 @@
 package com.example.fergietime
 
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Text
-import androidx.compose.material3.Scaffold
-import androidx.compose.runtime.*
-import androidx.compose.ui.unit.sp
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.Arrangement
 
-
+// テーマ設定画面
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ThemeSettingScreen(
@@ -33,15 +22,28 @@ fun ThemeSettingScreen(
     onThemeChanged: (ThemeMode) -> Unit,
     onBack: () -> Unit
 ) {
-    // ThemeMode を SettingOption に変換
+    // ThemeMode を画面表示用の SettingOption に変換
     val themeOptions = remember {
         mutableStateListOf(
-            SettingOption("ライトテーマ", "明るい背景色を使用", selected = currentTheme == ThemeMode.ライト),
-            SettingOption("ダークテーマ", "暗い背景色を使用", selected = currentTheme == ThemeMode.ダーク),
-            SettingOption("自動", "システム設定に従う", selected = currentTheme == ThemeMode.自動)
+            SettingOption(
+                title = "ライトテーマ",
+                description = "明るい背景色を使用",
+                selected = currentTheme == ThemeMode.ライト
+            ),
+            SettingOption(
+                title = "ダークテーマ",
+                description = "暗い背景色を使用",
+                selected = currentTheme == ThemeMode.ダーク
+            ),
+            SettingOption(
+                title = "自動",
+                description = "システム設定に従う",
+                selected = currentTheme == ThemeMode.自動
+            )
         )
     }
 
+    // 画面全体のレイアウト
     Scaffold(
         topBar = {
             TopAppBar(
@@ -61,20 +63,21 @@ fun ThemeSettingScreen(
                 .padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+            // 各テーマオプションを表示
             items(themeOptions) { option ->
                 val index = themeOptions.indexOf(option)
 
                 SettingOptionCard(
                     option = option,
                     onClick = {
-                        // 選択状態を更新
+                        // 選択状態を更新: クリックされた行のみ selected=true
                         val updated = themeOptions.mapIndexed { i, o ->
                             o.copy(selected = (i == index))
                         }
                         themeOptions.clear()
                         themeOptions.addAll(updated)
 
-                        // ThemeMode をコールバック
+                        // 選択されたテーマをコールバックで通知
                         val newTheme = when (index) {
                             0 -> ThemeMode.ライト
                             1 -> ThemeMode.ダーク

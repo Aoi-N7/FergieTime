@@ -14,6 +14,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
+// 個人情報カード（名前・ステータス・メッセージ・位置などを表示）
 @Composable
 fun PersonCard(
     name: String,
@@ -34,6 +35,7 @@ fun PersonCard(
                 .padding(16.dp),
             verticalAlignment = Alignment.Top
         ) {
+            // アバター部分
             Card(
                 modifier = Modifier.size(48.dp),
                 shape = MaterialTheme.shapes.extraLarge
@@ -49,9 +51,10 @@ fun PersonCard(
                     )
                 }
             }
-            
+
             Spacer(modifier = Modifier.width(12.dp))
-            
+
+            // 詳細情報部分
             Column(modifier = Modifier.weight(1f)) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically
@@ -67,9 +70,10 @@ fun PersonCard(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
-                
+
                 Spacer(modifier = Modifier.height(4.dp))
-                
+
+                // ステータス表示（危険・安全・避難中など）
                 Card(
                     colors = CardDefaults.cardColors(containerColor = statusColor),
                     shape = RoundedCornerShape(8.dp)
@@ -82,15 +86,16 @@ fun PersonCard(
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                     )
                 }
-                
+
                 Spacer(modifier = Modifier.height(8.dp))
-                
+
+                // メッセージ・位置情報
                 Text(
                     text = message,
                     fontSize = 14.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                
+
                 Text(
                     text = location,
                     fontSize = 12.sp,
@@ -99,8 +104,9 @@ fun PersonCard(
             }
         }
     }
-    
+
     if (showCard) {
+        // カードとして表示する場合
         Card(
             modifier = Modifier.fillMaxWidth(),
             elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
@@ -108,6 +114,7 @@ fun PersonCard(
             content()
         }
     } else {
+        // カードを使わず直接表示する場合
         content()
     }
 }

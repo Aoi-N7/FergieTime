@@ -14,6 +14,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
+
+// 設定画面全体
+
 @Composable
 fun SettingsScreen(
     onSettingClick: (String) -> Unit,
@@ -22,9 +25,10 @@ fun SettingsScreen(
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+            .padding(16.dp), // 全体のパディング
+        verticalArrangement = Arrangement.spacedBy(12.dp) // 項目間の間隔
     ) {
+        // タイトル
         item {
             Text(
                 text = "設定",
@@ -35,6 +39,7 @@ fun SettingsScreen(
             )
         }
 
+        // 言語設定項目
         item {
             SettingItem(
                 icon = Icons.Default.Language,
@@ -44,6 +49,7 @@ fun SettingsScreen(
             )
         }
 
+        // テーマ設定項目
         item {
             SettingItem(
                 icon = Icons.Default.DarkMode,
@@ -53,6 +59,7 @@ fun SettingsScreen(
             )
         }
 
+        // 音声案内設定項目
         item {
             SettingItem(
                 icon = Icons.Default.VolumeUp,
@@ -62,6 +69,7 @@ fun SettingsScreen(
             )
         }
 
+        // ユーザー設定項目
         item {
             SettingItem(
                 icon = Icons.Default.Person,
@@ -71,6 +79,7 @@ fun SettingsScreen(
             )
         }
 
+        // 家族情報設定項目
         item {
             SettingItem(
                 icon = Icons.Default.Group,
@@ -80,6 +89,7 @@ fun SettingsScreen(
             )
         }
 
+        // 通知設定項目
         item {
             SettingItem(
                 icon = Icons.Default.Notifications,
@@ -89,6 +99,7 @@ fun SettingsScreen(
             )
         }
 
+        // キャッシュ管理項目
         item {
             SettingItem(
                 icon = Icons.Default.Delete,
@@ -98,6 +109,7 @@ fun SettingsScreen(
             )
         }
 
+        // アプリ情報項目
         item {
             SettingItem(
                 icon = Icons.Default.Info,

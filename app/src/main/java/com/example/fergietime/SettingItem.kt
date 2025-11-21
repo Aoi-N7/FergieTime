@@ -14,11 +14,19 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
+/**
+ * 設定画面用のリストアイテム。
+ *
+ * @param icon アイコン
+ * @param title タイトル
+ * @param subtitle サブタイトル（オプション）
+ * @param onClick クリック時の処理
+ */
 @Composable
 fun SettingItem(
     icon: ImageVector,
     title: String,
-    subtitle: String?,
+    subtitle: String? = null,
     onClick: () -> Unit
 ) {
     Card(
@@ -31,6 +39,7 @@ fun SettingItem(
             modifier = Modifier.padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            // 左側のアイコン
             Icon(
                 imageVector = icon,
                 contentDescription = null,
@@ -40,6 +49,7 @@ fun SettingItem(
 
             Spacer(modifier = Modifier.width(16.dp))
 
+            // タイトルとサブタイトル
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = title,
@@ -47,15 +57,16 @@ fun SettingItem(
                     color = MaterialTheme.colorScheme.onSurface
                 )
 
-                if (subtitle != null) {
+                subtitle?.let {
                     Text(
-                        text = subtitle,
+                        text = it,
                         fontSize = 14.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
 
+            // 右側の矢印アイコン
             Icon(
                 imageVector = Icons.Default.ChevronRight,
                 contentDescription = null,

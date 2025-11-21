@@ -34,7 +34,6 @@ fun FergieTimeTheme(
         ThemeMode.自動 -> isSystemInDarkTheme()
     }
 
-    // あとは今までの色設定を使う
     MaterialTheme(
         colorScheme = if(darkTheme) DarkColorScheme else LightColorScheme,
         typography = Typography,

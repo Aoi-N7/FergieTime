@@ -1,3 +1,13 @@
+/**
+ * 避難経路画面（EvacuationMapScreen）を構成する UI をまとめたファイル。
+ *
+ * 簡易的な地図表示、現在地・目的地のマーカー描画、避難ルートのステップ表示、
+ * ナビゲーション開始ボタンなど、避難所までの案内 UI を提供する。
+ *
+ * Canvas を用いた地図の背景描画や、ルート案内カード、ボタン UI など
+ * 複数のコンポーネントで構成されている。
+ */
+
 package com.example.fergietime
 
 import androidx.compose.foundation.Canvas
@@ -21,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @OptIn(ExperimentalMaterial3Api::class)
+// 避難経路画面のトップレベル UI
 @Composable
 fun EvacuationMapScreen(onBack: () -> Unit) {
     Scaffold(
@@ -49,9 +60,7 @@ fun EvacuationMapScreen(onBack: () -> Unit) {
                     }
                 },
                 actions = {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
                             imageVector = Icons.Default.Schedule,
                             contentDescription = null,
@@ -75,21 +84,16 @@ fun EvacuationMapScreen(onBack: () -> Unit) {
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            item {
-                EvacuationMapContainer()
-            }
-            
-            item {
-                RouteInstructions()
-            }
-            
-            item {
-                StartNavigationButton()
-            }
+            item { EvacuationMapContainer() }
+
+            item { RouteInstructions() }
+
+            item { StartNavigationButton() }
         }
     }
 }
 
+// 地図背景と現在地・目的地マーカーを描画するコンテナ
 @Composable
 fun EvacuationMapContainer() {
     Box(
@@ -98,13 +102,11 @@ fun EvacuationMapContainer() {
             .height(400.dp)
             .background(Color(0xFFF5F5F5))
     ) {
-        Canvas(
-            modifier = Modifier.fillMaxSize()
-        ) {
+        Canvas(modifier = Modifier.fillMaxSize()) {
             drawEvacuationMapBackground(this)
         }
-        
-        // Current Location (Start)
+
+        // 現在地
         Box(
             modifier = Modifier
                 .align(Alignment.TopStart)
@@ -116,8 +118,8 @@ fun EvacuationMapContainer() {
                 label = "現在地"
             )
         }
-        
-        // Evacuation Shelter (Destination)
+
+        // 目的地（避難所）
         Box(
             modifier = Modifier
                 .align(Alignment.TopEnd)
@@ -132,6 +134,7 @@ fun EvacuationMapContainer() {
     }
 }
 
+// 避難ルートのステップ案内を表示
 @Composable
 fun RouteInstructions() {
     Column(
@@ -144,21 +147,21 @@ fun RouteInstructions() {
             distance = "200m • 約2分",
             isActive = true
         )
-        
+
         RouteInstructionCard(
             stepNumber = "2",
             instruction = "右折して東に向かう",
             distance = "150m • 約2分",
             isActive = false
         )
-        
+
         RouteInstructionCard(
             stepNumber = "3",
             instruction = "左折して北に向かう",
             distance = "100m • 約1分",
             isActive = false
         )
-        
+
         RouteInstructionCard(
             stepNumber = null,
             instruction = "●●小学校に到着",
@@ -169,6 +172,7 @@ fun RouteInstructions() {
     }
 }
 
+// ナビゲーション開始ボタン
 @Composable
 fun StartNavigationButton() {
     Box(
@@ -200,26 +204,27 @@ fun StartNavigationButton() {
     }
 }
 
+// キャンバス上に簡易地図（道路や避難ルート）を描画
 fun drawEvacuationMapBackground(drawScope: DrawScope) {
     with(drawScope) {
         val width = size.width
         val height = size.height
-        
+
         val streetColor = Color(0xFFE5E7EB)
-        
-        // Horizontal Streets
+
+        // 横方向の道路
         drawLine(streetColor, Offset(0f, height * 0.2f), Offset(width, height * 0.2f), strokeWidth = 4f)
         drawLine(streetColor, Offset(0f, height * 0.4f), Offset(width, height * 0.4f), strokeWidth = 6f)
         drawLine(streetColor, Offset(0f, height * 0.6f), Offset(width, height * 0.6f), strokeWidth = 4f)
         drawLine(streetColor, Offset(0f, height * 0.8f), Offset(width, height * 0.8f), strokeWidth = 4f)
-        
-        // Vertical Streets
+
+        // 縦方向の道路
         drawLine(streetColor, Offset(width * 0.2f, 0f), Offset(width * 0.2f, height), strokeWidth = 4f)
         drawLine(streetColor, Offset(width * 0.4f, 0f), Offset(width * 0.4f, height), strokeWidth = 4f)
         drawLine(streetColor, Offset(width * 0.6f, 0f), Offset(width * 0.6f, height), strokeWidth = 6f)
         drawLine(streetColor, Offset(width * 0.8f, 0f), Offset(width * 0.8f, height), strokeWidth = 4f)
-        
-        // Evacuation Route - Blue Dashed Path
+
+        // 青の点線で避難ルートを描画
         val routeColor = Color(0xFF2563EB)
         val path = Path().apply {
             moveTo(width * 0.11f, height * 0.11f)
@@ -228,7 +233,7 @@ fun drawEvacuationMapBackground(drawScope: DrawScope) {
             lineTo(width * 0.5f, height * 0.3f)
             lineTo(width * 0.7f, height * 0.3f)
         }
-        
+
         drawPath(
             path = path,
             color = routeColor,
@@ -237,8 +242,8 @@ fun drawEvacuationMapBackground(drawScope: DrawScope) {
                 pathEffect = PathEffect.dashPathEffect(floatArrayOf(16f, 8f))
             )
         )
-        
-        // Route waypoints
+
+        // ルート上のポイントを描画
         drawCircle(
             color = Color(0xFF2563EB),
             radius = 6f,
